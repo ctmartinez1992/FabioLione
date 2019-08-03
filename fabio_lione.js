@@ -124,7 +124,7 @@ function processCommand(receivedCommand) {
     } else if (command === "set") {
         SetCommand(args, receivedCommand);
     } else {
-        receivedCommand.channel.send("Unknown command. Try '!help' or '!kys'");
+        receivedCommand.channel.send("Unknown command. Try '\\help' or '\\kys'");
     }
 }
 
@@ -133,19 +133,19 @@ function HelpCommand(args, receivedCommand) {
         receivedCommand.channel.send(`\n
 Fabio Lione will tell you when a new weekly release thread was posted.
 List of available commands:
-    !help: A list of all commands and an explanation for each.
-        Use: '!help command_name' for a detailed explanation of the command.
-    !toggle: Toggle features on or off.
-    !set: Change internal variables to customize behavior.`);
+    \\help: A list of all commands and an explanation for each.
+        Use: '\\help command_name' for a detailed explanation of the command.
+    \\toggle: Toggle features on or off.
+    \\set: Change internal variables to customize behavior.`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
         } else if (args[0] === 'toggle') {
-            receivedCommand.channel.send(`Toggle a feature on or off. Use: '!toggle list' to see what can be toggled.`);
+            receivedCommand.channel.send(`Toggle a feature on or off. Use: '\\toggle list' to see what can be toggled.`);
         } else if (args[0] === 'set') {
-            receivedCommand.channel.send(`Set a variable value to something else. Use: '!set list' to see what can be toggled.`);
+            receivedCommand.channel.send(`Set a variable value to something else. Use: '\\set list' to see what can be toggled.`);
         } else {
-            receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '!help' command. Use only '!help'.`));
+            receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
         }
     }
 }
@@ -154,14 +154,14 @@ function ToggleCommand(args, receivedCommand) {
     if (args.length <= 0) {
         receivedCommand.channel.send(`\n
 Toggle features on or off. Use:
-    '!toggle feature_name' to toggle on or off a feature.
-    '!toggle list' to list all toggleable features.`
+    '\\toggle feature_name' to toggle on or off a feature.
+    '\\toggle list' to list all toggleable features.`
         );
     } else {
         if (args[0] === 'list') {
             receivedCommand.channel.send(`\n
 This is a list of all toggleable features:
-    '!toggle weekly' to turn of/off the share weekly release thread feature.`);
+    '\\toggle weekly' to turn of/off the share weekly release thread feature.`);
         } else if (args[0] === 'weekly') {
             if (args.length >= 2) {
                 newInterval = parseInt(args[1], 10) || weeklyReleasesIntervalDefault;
@@ -171,7 +171,7 @@ This is a list of all toggleable features:
                 receivedCommand.channel.send('Turning weekly releases feature '.concat((weeklyReleasesIsActive) ? 'on.' : 'off.'));
             }
         } else {
-            receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '!toggle' command. Use '!help toggle' for more information.`));
+            receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\toggle' command. Use '\\help toggle' for more information.`));
         }
     }
 }
@@ -180,18 +180,18 @@ function SetCommand(args, receivedCommand) {
     if (args.length <= 0) {
         receivedCommand.channel.send(`\n
 Allows you customize certain behaviors. Use:
-    '!set list' for a list of all variables that can be set.`);
+    '\\set list' for a list of all variables that can be set.`);
     } else {
         if (args.length === 1) {
             if (args[0] === 'list') {
                 receivedCommand.channel.send(`\n
 This is a list of all settable variables:
-    '!set weekly interval value' to set the interval with which a new weekly release thread is checked for. Replace 'value' with an integer from 1 to 1000. This value is in seconds.`);
+    '\\set weekly interval value' to set the interval with which a new weekly release thread is checked for. Replace 'value' with an integer from 1 to 1000. This value is in seconds.`);
             }
             else if (args[0] === 'weekly') {
-                receivedCommand.channel.send(`Argument (`.concat(args[0], `) needs more arguments. Use '!help set' for more information.`));
+                receivedCommand.channel.send(`Argument (`.concat(args[0], `) needs more arguments. Use '\\help set' for more information.`));
             } else {
-                receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '!toggle' command. Use '!help toggle' for more information.`));
+                receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\toggle' command. Use '\\help toggle' for more information.`));
             }
         } else if (args.length === 3) {
             if (args[0] === 'weekly' && args[1] === 'interval') {
@@ -200,7 +200,7 @@ This is a list of all settable variables:
                 SetWeeklyReleasesInterval(newInterval);
             }
         } else {
-            receivedCommand.channel.send(`Invalid amount of arguments. Use '!help set' for more information.`);
+            receivedCommand.channel.send(`Invalid amount of arguments. Use '\\help set' for more information.`);
         }
     }
 }
