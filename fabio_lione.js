@@ -76,25 +76,24 @@ function ProcessWeeklyReleases() {
         } else {
             console.log('URL ('.concat(url, ') retrieved data successfully.'));
 
-            const lastRedditPost = data.data.children[0].data;
-            console.log('Last reddit post: '.concat(lastRedditPost.title));
+            //NOTE (carlos): A bit of an odd choice, but I don't want to just check the last post.
+            //As a safeguard, I'm going to be checking the last five posts, just to make sure that there was no abnormal amount of posts in a short amount of time.
+            for (var i = 4; i >= 0; --i) {
+                const redditPost = data.data.children[i].data;
+                console.log('Checking reddit post: '.concat(redditPost.title));
 
-            if (lastWeeklyReleasesSharedID !== lastRedditPost.id) {
-                if (lastRedditPost.title.toLowerCase().trim().includes("this week in power metal releases")) {
-                    console.log('Old stored ID: '.concat(lastWeeklyReleasesSharedID, ' -- New stored ID: ', lastRedditPost.id));
-                    lastWeeklyReleasesSharedID = lastRedditPost.id;
+                if (lastWeeklyReleasesSharedID !== redditPost.id && redditPost.title.toLowerCase().trim().includes("this week in power metal releases")) {
+                    console.log('Old stored ID: '.concat(lastWeeklyReleasesSharedID, ' -- New stored ID: ', redditPost.id));
+                    lastWeeklyReleasesSharedID = redditPost.id;
 
                     chat_channel_ids.forEach(function(id) {
-                        console.log('Sending this URL ('.concat(lastRedditPost.url, ') to channel.'));
-                        client.channels.get(chat_channel_id).send(lastRedditPost.url);
+                        console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
+                        client.channels.get(chat_channel_id).send(redditPost.url);
                     });
                 }
                 else {
                     console.log(`Found a new post but it's not the weekly release post.`);
                 }
-            }
-            else {
-                console.log(`Found a new post but it's not the weekly release post.`);
             }
         }
     });
@@ -130,6 +129,7 @@ function processCommand(receivedCommand) {
 function HelpCommand(args, receivedCommand) {
     if (args.length <= 0) {
         receivedCommand.channel.send(`\n
+Fabio Lione will tell you when a new weekly release thread was posted.
 List of available commands:
     !help: A list of all commands and an explanation for each.
         Use: '!help command_name' for a detailed explanation of the command.
