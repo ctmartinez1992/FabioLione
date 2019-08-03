@@ -27,7 +27,7 @@ client.on('message', (receivedCommand) => {
     if (receivedCommand.author === client.user) {
         return;
     }
-    if (receivedCommand.content.startsWith("!")) {
+    if (receivedCommand.content.startsWith("\\")) {
         processCommand(receivedCommand);
     }
 });
