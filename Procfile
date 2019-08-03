@@ -1,0 +1,1 @@
+worker: node src/fabio_lione.js
