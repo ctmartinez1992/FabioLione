@@ -5,7 +5,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const bot_secret_token = 'MjMxNDEyNTc5NzY1OTc3MDg5.XUVXgA.kN4Pm_CWbLEYUQhRGhnlyZVa3uI'
-const chat_channel_id = '469807990833414154';
+const chat_channel_ids = ['469807990833414154', '230359936566165506'];
 
 //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
 var weeklyReleasesIsActive = false;
@@ -79,18 +79,22 @@ function ProcessWeeklyReleases() {
             const lastRedditPost = data.data.children[0].data;
             console.log('Last reddit post: '.concat(lastRedditPost.title));
 
-            const channelToInform = client.channels.get(chat_channel_id);
             if (lastWeeklyReleasesSharedID !== lastRedditPost.id) {
-                //if (lastRedditPost.title.toLowerCase().trim().includes("this week in power metal releases")) {
+                if (lastRedditPost.title.toLowerCase().trim().includes("this week in power metal releases")) {
                     console.log('Old stored ID: '.concat(lastWeeklyReleasesSharedID, ' -- New stored ID: ', lastRedditPost.id));
                     lastWeeklyReleasesSharedID = lastRedditPost.id;
 
-                    console.log('Sending this URL ('.concat(lastRedditPost.url, ') to channel (name here).'));
-                    channelToInform.send(lastRedditPost.url);
-                //}
+                    chat_channel_ids.forEach(function(id) {
+                        console.log('Sending this URL ('.concat(lastRedditPost.url, ') to channel.'));
+                        client.channels.get(chat_channel_id).send(lastRedditPost.url);
+                    });
+                }
+                else {
+                    console.log(`Found a new post but it's not the weekly release post.`);
+                }
             }
             else {
-                channelToInform.send("Just checked for a new weekly release, but nothing new.");
+                console.log(`Found a new post but it's not the weekly release post.`);
             }
         }
     });
