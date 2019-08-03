@@ -1,0 +1,24 @@
+{
+  "name": "fabio_lione",
+  "version": "1.0.0",
+  "description": "Fabio Lione",
+  "main": "src/fabio_lione.js",
+  "dependencies": {
+    "discord.js": "^11.5.1",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ctmartinez1992/FabioLione.git"
+  },
+  "author": "Carlos Martinez",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ctmartinez1992/FabioLione/issues"
+  },
+  "homepage": "https://github.com/ctmartinez1992/FabioLione#readme"
+}
