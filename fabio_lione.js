@@ -90,6 +90,8 @@ function ProcessWeeklyReleases() {
                         console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
                         client.channels.get(chat_channel_id).send(redditPost.url);
                     });
+
+                    break;
                 }
                 else {
                     console.log(`Found a new post but it's not the weekly release post.`);
