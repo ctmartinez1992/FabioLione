@@ -1,1 +1,1 @@
-worker: node src/fabio_lione.js
+worker: node fabio_lione.js

@@ -4,7 +4,7 @@ const request = require('request');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const bot_secret_token = 'MjMxNDEyNTc5NzY1OTc3MDg5.XUVXgA.kN4Pm_CWbLEYUQhRGhnlyZVa3uI'
+const bot_secret_token = 'MjMxNDEyNTc5NzY1OTc3MDg5.XUXQiw.QAKobbyCB_N6cJyTSQARG9xiG2Y';
 const chat_channel_ids = ['469807990833414154', '230359936566165506'];
 
 //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
