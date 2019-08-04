@@ -54,8 +54,8 @@ function ToggleWeeklyReleasesFeature() {
 }
 
 function CleanWeeklyReleasesInterval(newInterval) {
-    if (newInterval < 1) {
-        newInterval = 1;
+    if (newInterval < 60) {
+        newInterval = 60;
     } else if (newInterval > 1000) {
         newInterval = 1000;
     }
