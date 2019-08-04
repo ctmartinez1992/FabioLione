@@ -87,7 +87,7 @@ function ProcessWeeklyReleases() {
                 const redditPost = data.data.children[i].data;
                 console.log('Checking reddit post: '.concat(redditPost.title));
 
-                if (lastWeeklyReleasesSharedID !== redditPost.id && redditPost.title.toLowerCase().trim().includes("this week in power metal releases")) {
+                if (lastWeeklyReleasesSharedID !== redditPost.id && redditPost.title.toLowerCase().trim().includes(/*"this week in power metal releases"*/"general discussion")) {
                     console.log('Old stored ID: '.concat(lastWeeklyReleasesSharedID, ' -- New stored ID: ', redditPost.id));
                     lastWeeklyReleasesSharedID = redditPost.id;
 
