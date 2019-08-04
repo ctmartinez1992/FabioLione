@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('./my_config');
+const config = require('./config');
 
 const request = require('request');
 const Discord = require('discord.js');
