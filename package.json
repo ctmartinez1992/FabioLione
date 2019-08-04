@@ -4,6 +4,7 @@
   "description": "Fabio Lione",
   "main": "src/fabio_lione.js",
   "dependencies": {
+    "aws-sdk": "^2.503.0",
     "discord.js": "^11.5.1",
     "request": "^2.88.0"
   },
