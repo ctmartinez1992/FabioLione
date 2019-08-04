@@ -225,4 +225,4 @@ function millisToMinutesAndSeconds(millis) {
     return (minutes + ":" + (seconds < 10 ? '0' : '') + seconds);
 }
 
-//⚒⚒⚒Madwave is forever⚒⚒⚒
+//⚒⚒⚒Madwave is forever⚒⚒⚒\\
