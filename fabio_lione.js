@@ -1,6 +1,6 @@
 'use strict';
 
-const secret = require('./secret');
+const config = require('./config');
 
 const request = require('request');
 const Discord = require('discord.js');
@@ -10,13 +10,13 @@ const chat_channel_ids = ['469807990833414154', '230359936566165506'];
 
 //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
 var weeklyReleasesIsActive = false;
-var weeklyReleasesIntervalDefault = 60000;
+var weeklyReleasesIntervalDefault = 100000;
 var weeklyReleasesInterval = weeklyReleasesIntervalDefault;
 var weeklyReleasesFuncObj = null;
 var lastWeeklyReleasesSharedID = 0;
 const url = 'https://www.reddit.com/r/powermetal/new.json?sort=new';
 
-client.login(secret.bot_secret);
+client.login(config.bot_secret);
 
 client.on('ready', () => {
     console.log('Connected as ', client.user.tag);
@@ -78,8 +78,8 @@ function ProcessWeeklyReleases() {
             console.log('URL ('.concat(url, ') retrieved data successfully.'));
 
             //NOTE (carlos): A bit of an odd choice, but I don't want to just check the last post.
-            //As a safeguard, I'm going to be checking the last five posts, just to make sure that there was no abnormal amount of posts in a short amount of time.
-            for (var i = 4; i >= 0; --i) {
+            //As a safeguard, I'm going to be checking the last three posts, just to make sure that there was no abnormal amount of posts in a short amount of time.
+            for (var i = 2; i >= 0; --i) {
                 const redditPost = data.data.children[i].data;
                 console.log('Checking reddit post: '.concat(redditPost.title));
 
