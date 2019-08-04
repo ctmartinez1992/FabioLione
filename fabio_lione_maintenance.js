@@ -1,13 +1,13 @@
 'use strict';
 
-const secret = require('./secret');
+const config = require('./config');
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
 const chat_channel_ids = ['469807990833414154', '230359936566165506'];
 
-client.login(secret.bot_secret);
+client.login(config.bot_secret);
 
 client.on('ready', () => {
     console.log('Connected as ', client.user.tag);
