@@ -6,21 +6,21 @@ const request = require('request');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const chat_channel_ids = ['469807990833414154', '230359936566165506'];
-
 //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
 var weeklyReleasesIsActive = false;
-var weeklyReleasesIntervalDefault = 100000;
-var weeklyReleasesInterval = weeklyReleasesIntervalDefault;
+var weeklyReleasesInterval = config.weekly_releases_interval_default;
 var weeklyReleasesFuncObj = null;
 var lastWeeklyReleasesSharedID = 0;
-const url = 'https://www.reddit.com/r/powermetal/new.json?sort=new';
 
 client.login(config.bot_secret);
 
 client.on('ready', () => {
-    console.log('Connected as ', client.user.tag);
-    ToggleWeeklyReleasesFeature();
+    if (config.is_in_maintenance) {
+        console.log('Connected as ', client.user.tag, ' (Down for Maintenance)');
+    } else {
+        console.log('Connected as ', client.user.tag);
+        ToggleWeeklyReleasesFeature();
+    }
 });
 
 client.on('message', (receivedCommand) => {
@@ -29,7 +29,11 @@ client.on('message', (receivedCommand) => {
         return;
     }
     if (receivedCommand.content.startsWith("\\")) {
-        processCommand(receivedCommand);
+        if (config.is_in_maintenance) {
+            receivedCommand.channel.send(`Fabio Lione is performing guest vocals in some band. He will return promptly.`);
+        } else {
+            processCommand(receivedCommand);
+        }
     }
 });
 
@@ -66,7 +70,7 @@ function SetWeeklyReleasesInterval(newInterval) {
 function ProcessWeeklyReleases() {
     console.log("Getting the last 25 posts and searching for a fresh weekly releases thread...");
     request.get({
-        url: url,
+        url: config.weekly_releases_reddit_url,
         json: true,
         headers: { 'User-Agent': 'request' }
     }, (err, res, data) => {
@@ -75,7 +79,7 @@ function ProcessWeeklyReleases() {
         } else if (res.statusCode !== 200) {
             console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
         } else {
-            console.log('URL ('.concat(url, ') retrieved data successfully.'));
+            console.log('URL ('.concat(config.weekly_releases_reddit_url, ') retrieved data successfully.'));
 
             //NOTE (carlos): A bit of an odd choice, but I don't want to just check the last post.
             //As a safeguard, I'm going to be checking the last three posts, just to make sure that there was no abnormal amount of posts in a short amount of time.
@@ -87,9 +91,9 @@ function ProcessWeeklyReleases() {
                     console.log('Old stored ID: '.concat(lastWeeklyReleasesSharedID, ' -- New stored ID: ', redditPost.id));
                     lastWeeklyReleasesSharedID = redditPost.id;
 
-                    chat_channel_ids.forEach(function(id) {
+                    config.chat_channel_ids.forEach(function(id) {
                         console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
-                        client.channels.get(chat_channel_id).send(redditPost.url);
+                        client.channels.get(id).send(redditPost.url);
                     });
 
                     break;
