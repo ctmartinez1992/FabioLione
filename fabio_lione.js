@@ -68,7 +68,7 @@ function SetWeeklyReleasesInterval(newInterval) {
 }
 
 function ProcessWeeklyReleases() {
-    console.log("Getting the last 25 posts and searching for a fresh weekly releases thread...");
+    console.log("Getting the last 3 posts and searching for a fresh weekly releases thread...");
     request.get({
         url: config.weekly_releases_reddit_url,
         json: true,
