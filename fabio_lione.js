@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('./config');
+const config = require('./my_config');
 
 const request = require('request');
 const Discord = require('discord.js');
@@ -10,7 +10,10 @@ const client = new Discord.Client();
 var weeklyReleasesIsActive = false;
 var weeklyReleasesInterval = config.weekly_releases_interval_default;
 var weeklyReleasesFuncObj = null;
-var lastWeeklyReleasesSharedID = 0;
+var lastGeneralID = 0;              //General Discussions thread.
+var lastThisWeekID = 0;             //This Week in Power Metal Releases thread.
+var lastListeningID = 0;            //This Week I've been Listening thread.
+var lastRecommendationsID = 0;      //Recommendations for the Week thread.
 
 client.login(config.bot_secret);
 
@@ -87,23 +90,28 @@ function ProcessWeeklyReleases() {
                 const redditPost = data.data.children[i].data;
                 console.log('Checking reddit post: '.concat(redditPost.title));
 
-                if (lastWeeklyReleasesSharedID !== redditPost.id && redditPost.title.toLowerCase().trim().includes("this week in power metal releases")) {
-                    console.log('Old stored ID: '.concat(lastWeeklyReleasesSharedID, ' -- New stored ID: ', redditPost.id));
-                    lastWeeklyReleasesSharedID = redditPost.id;
+                const trimmedTitle = redditPost.title.toLowerCase().trim();
 
-                    config.chat_channel_ids.forEach(function(id) {
-                        console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
-                        client.channels.get(id).send(redditPost.url);
-                    });
-
-                    break;
-                }
-                else {
-                    console.log(`Found a new post but it's not the weekly release post.`);
-                }
+                lastGeneralID = _ProcessWeeklyRelease(lastGeneralID, redditPost.id, trimmedTitle, "general discussion", redditPost.url);
+                lastThisWeekID = _ProcessWeeklyRelease(lastThisWeekID, redditPost.id, trimmedTitle, "this week in power metal releases", redditPost.url);
+                lastListeningID = _ProcessWeeklyRelease(lastListeningID, redditPost.id, trimmedTitle, "this week i've been listening to...", redditPost.url);
+                lastRecommendationsID = _ProcessWeeklyRelease(lastRecommendationsID, redditPost.id, trimmedTitle, "recommendations for the week", redditPost.url);
             }
         }
     });
+}
+
+function _ProcessWeeklyRelease(lastID, redditPostID, trimmedTitle, stringToCompare, redditPostURL) {
+    if (lastID !== redditPostID && trimmedTitle.includes(stringToCompare)) {
+        console.log('Old stored ID: '.concat(lastID, ' -- New stored ID: ', redditPostID));
+
+        config.chat_channel_ids.forEach(function(id) {
+            console.log('Sending this URL ('.concat(redditPostURL, ') to channel.'));
+            client.channels.get(id).send(redditPostURL);
+        });
+        return redditPostID;
+    }
+    return lastID;
 }
 
 // /$$$$$$\                                                                  $$\           
@@ -128,6 +136,8 @@ function processCommand(receivedCommand) {
         ToggleCommand(args, receivedCommand);
     } else if (command === "set") {
         SetCommand(args, receivedCommand);
+    } else if (command === "corgi") {
+        CorgiCommand(args, receivedCommand);
     } else {
         receivedCommand.channel.send("Unknown command. Try '\\help' or '\\kys'");
     }
@@ -141,7 +151,8 @@ List of available commands:
     \\help: A list of all commands and an explanation for each.
         Use: '\\help command_name' for a detailed explanation of the command.
     \\toggle: Toggle features on or off.
-    \\set: Change internal variables to customize behavior.`);
+    \\set: Change internal variables to customize behavior.
+    \\corgi: Fresh corgi content.`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
@@ -149,6 +160,8 @@ List of available commands:
             receivedCommand.channel.send(`Toggle a feature on or off. Use: '\\toggle list' to see what can be toggled.`);
         } else if (args[0] === 'set') {
             receivedCommand.channel.send(`Set a variable value to something else. Use: '\\set list' to see what can be toggled.`);
+        } else if (args[0] === 'corgi') {
+            receivedCommand.channel.send(`Searches reddit for a good ol' corgo.`);
         } else {
             receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
         }
@@ -208,6 +221,28 @@ This is a list of all settable variables:
             receivedCommand.channel.send(`Invalid amount of arguments. Use '\\help set' for more information.`);
         }
     }
+}
+
+function CorgiCommand(args, receivedCommand) {
+    const channelID = receivedCommand.channel.id;
+    console.log("Getting a fresh corgi...");
+    request.get({
+        url: 'https://www.reddit.com/r/corgi/random.json?sort=new',
+        json: true,
+        headers: { 'User-Agent': 'request' }
+    }, (err, res, data) => {
+        if (err) {
+            console.log('Error: '.concat(err, ' -- Quitting function.'));
+        } else if (res.statusCode !== 200) {
+            console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
+        } else {
+            console.log('URL ('.concat('https://www.reddit.com/r/corgi/random.json?sort=new', ') retrieved data successfully.'));
+            
+            const redditPost = data[0].data.children[0].data;
+            console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
+            client.channels.get(channelID).send(redditPost.url);
+        }
+    });
 }
 
 ///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
