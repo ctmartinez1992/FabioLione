@@ -1,10 +1,11 @@
 'use strict';
 
+const secret = require('./secret');
+
 const request = require('request');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const bot_secret_token = 'MjMxNDEyNTc5NzY1OTc3MDg5.XUXQiw.QAKobbyCB_N6cJyTSQARG9xiG2Y';
 const chat_channel_ids = ['469807990833414154', '230359936566165506'];
 
 //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
@@ -15,7 +16,7 @@ var weeklyReleasesFuncObj = null;
 var lastWeeklyReleasesSharedID = 0;
 const url = 'https://www.reddit.com/r/powermetal/new.json?sort=new';
 
-client.login(bot_secret_token);
+client.login(secret.bot_secret);
 
 client.on('ready', () => {
     console.log('Connected as ', client.user.tag);
