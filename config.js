@@ -6,4 +6,4 @@ let heroku_config = new aws.S3({
 
 module.exports = {
     bot_secret: heroku_config.bot_secret
-}
+};
