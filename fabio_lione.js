@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('./config');
+const config = require('./my_config');
 
 const request = require('request');
 const Discord = require('discord.js');
@@ -257,7 +257,39 @@ function CorgiCommand(args, receivedCommand) {
 
 function SabatonCommand(args, receivedCommand) {
     const channelID = receivedCommand.channel.id;
-    client.channels.get(channelID).send("du du");
+
+    var rng = getRandomIntInRange(6, 24);
+    var string = "";
+    var skip = false;
+    
+    for (var i = 0; i < rng; i++) {
+        var style = getRandomIntInRange(1, 8);
+        var space = getRandomIntInRange(1, 4);
+
+        if (style === 1) {
+            string += "du";
+        } else if (style === 2) {
+            string += "_du_";
+        } else if (style === 3) {
+            string += "__du__";
+        } else if (style === 4) {
+            string += "~~du~~";
+        } else if (style === 5) {
+            string += "DU";
+        } else if (style === 6) {
+            string += "*DU*";
+        } else if (style === 7) {
+            string += "__DU__";
+        } else if (style === 8) {
+            string += "~~DU~~";
+        }
+    
+        if (space === 1) {
+            string += " ";
+        }
+    }
+
+    client.channels.get(channelID).send(string);
 }
 
 ///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
