@@ -136,7 +136,7 @@ function processCommand(receivedCommand) {
         ToggleCommand(args, receivedCommand);
     } else if (command === "set") {
         SetCommand(args, receivedCommand);
-    } else if (command === "corgi" || command === "corgi") {
+    } else if (command === "corgi" || command === "corgo") {
         CorgiCommand(args, receivedCommand);
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
