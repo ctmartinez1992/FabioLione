@@ -136,8 +136,10 @@ function processCommand(receivedCommand) {
         ToggleCommand(args, receivedCommand);
     } else if (command === "set") {
         SetCommand(args, receivedCommand);
-    } else if (command === "corgi") {
+    } else if (command === "corgi" || command === "corgi") {
         CorgiCommand(args, receivedCommand);
+    } else if (command === "sabaton") {
+        SabatonCommand(args, receivedCommand);
     } else {
         receivedCommand.channel.send("Unknown command. Try '\\help' or '\\kys'");
     }
@@ -152,7 +154,9 @@ List of available commands:
         Use: '\\help command_name' for a detailed explanation of the command.
     \\toggle: Toggle features on or off.
     \\set: Change internal variables to customize behavior.
-    \\corgi: Fresh corgi content.`);
+    \\corgi: Fresh corgi content.
+    \\corgo: Fresh corgo content.
+    \\sabaton: s a b a t o n k`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
@@ -160,8 +164,10 @@ List of available commands:
             receivedCommand.channel.send(`Toggle a feature on or off. Use: '\\toggle list' to see what can be toggled.`);
         } else if (args[0] === 'set') {
             receivedCommand.channel.send(`Set a variable value to something else. Use: '\\set list' to see what can be toggled.`);
-        } else if (args[0] === 'corgi') {
+        } else if (args[0] === 'corgi' || args[0] === 'corgo') {
             receivedCommand.channel.send(`Searches reddit for a good ol' corgo.`);
+        } else if (args[0] === 'sabaton') {
+            receivedCommand.channel.send(`Then the winged hussars arrived!`);
         } else {
             receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
         }
@@ -225,9 +231,13 @@ This is a list of all settable variables:
 
 function CorgiCommand(args, receivedCommand) {
     const channelID = receivedCommand.channel.id;
-    console.log("Getting a fresh corgi...");
+
+    const randomCorgiListID = getRandomIntInRange(0, 3);
+    const corgiURL = config.corgi_list[randomCorgiListID];
+
+    console.log("Getting a fresh corgi from ".concat(corgiURL));
     request.get({
-        url: 'https://www.reddit.com/r/corgi/random.json?sort=new',
+        url: corgiURL,
         json: true,
         headers: { 'User-Agent': 'request' }
     }, (err, res, data) => {
@@ -236,13 +246,18 @@ function CorgiCommand(args, receivedCommand) {
         } else if (res.statusCode !== 200) {
             console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
         } else {
-            console.log('URL ('.concat('https://www.reddit.com/r/corgi/random.json?sort=new', ') retrieved data successfully.'));
+            console.log('URL ('.concat(corgiURL, ') retrieved data successfully.'));
             
             const redditPost = data[0].data.children[0].data;
             console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
             client.channels.get(channelID).send(redditPost.url);
         }
     });
+}
+
+function SabatonCommand(args, receivedCommand) {
+    const channelID = receivedCommand.channel.id;
+    client.channels.get(channelID).send("du du");
 }
 
 ///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
@@ -258,6 +273,13 @@ function millisToMinutesAndSeconds(millis) {
     var minutes = Math.floor(millis / 60000);
     var seconds = ((millis % 60000) / 1000).toFixed(0);
     return (minutes + ":" + (seconds < 10 ? '0' : '') + seconds);
+}
+
+//min and max are inclusive.
+function getRandomIntInRange(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 //⚒⚒⚒Madwave is forever⚒⚒⚒\\
