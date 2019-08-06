@@ -140,8 +140,6 @@ function processCommand(receivedCommand) {
         CorgiCommand(args, receivedCommand);
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
-    } else {
-        receivedCommand.channel.send("Unknown command. Try '\\help' or '\\kys'");
     }
 }
 
