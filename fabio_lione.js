@@ -180,6 +180,7 @@ async function _SetReminder(user_id, user_name, channel_id, creation_date, expir
         timeout = expiration_date.getTime() - creation_date.getTime();
     } else {
         timeout = expiration_date.getTime() - (new Date).getTime();
+        console.log(timeout);
     }
 
     setTimeout((async () => {
