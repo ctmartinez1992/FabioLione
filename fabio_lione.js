@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('./config');
+const config = require('./my_config');
 
 const request = require('request');
 
@@ -156,6 +156,8 @@ function processCommand(receivedCommand) {
         ShibeCommand(args, receivedCommand);
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
+    } else if (command === "remind") {
+        RemindCommand(args, receivedCommand);
     }
 }
 
@@ -287,6 +289,103 @@ function SabatonCommand(args, receivedCommand) {
     }
 
     client.channels.get(channelID).send(string);
+}
+
+function _RemindValidateTimeValue(value) {
+    return /^\+?[1-9][\d]*$/.test(value);
+}
+
+function _RemindValidateTimeGranularity(value) {
+    return (value === "minute" || value === "minutes" ||
+            value === "hour" || value === "hours" ||
+            value === "day" || value === "days" ||
+            value === "month" || value === "months" ||
+            value === "year" || value === "years");
+}
+
+const MILLIS_IN_YEAR   = 31557600 * 1000;
+const MILLIS_IN_MONTH  = 2678400 * 1000;
+const MILLIS_IN_DAY    = 86400 * 1000;
+const MILLIS_IN_HOUR   = 3600 * 1000;
+const MILLIS_IN_MINUTE = 60 * 1000;
+function _RemindComputeExpirationDate(creation_date, time_value, time_granularity) {
+    if (time_granularity === "year" || time_granularity === "years") {
+        return new Date(creation_date.getTime() + (MILLIS_IN_YEAR * time_value));
+    } else if (time_granularity === "month" || time_granularity === "months") {
+        return new Date(creation_date.getTime() + (MILLIS_IN_MONTH * time_value));
+    } else if (time_granularity === "day" || time_granularity === "days") {
+        return new Date(creation_date.getTime() + (MILLIS_IN_DAY * time_value));
+    } else if (time_granularity === "hours" || time_granularity === "hours") {
+        return new Date(creation_date.getTime() + (MILLIS_IN_HOUR * time_value));
+    } else if (time_granularity === "minute" || time_granularity === "minutes") {
+        return new Date(creation_date.getTime() + (MILLIS_IN_MINUTE * time_value));
+    }
+    return new Date(creation_date.getTime() + (MILLIS_IN_MINUTE * 1));
+}
+
+async function RemindCommand(args, receivedCommand) {
+    if (args.length <= 0) {
+        receivedCommand.channel.send(`\n
+Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use:
+\\remind in time_value time_granularity to reminder_content
+  * time_value can be any positive integer above 0;
+  * time_granularity can be minute(s), hour(s), day(s), month(s), year(s);
+  * reminder_content is what you want to be reminded of;
+  * NOTE: The in and to words need to be there, they don't need to be in or to respectively, they just need to be a word.`
+        );
+    } else {
+        var time_value = 0;
+        var time_granularity = "";
+        var reminder_content = "";
+
+        if (!_RemindValidateTimeValue(args[1])) {
+            receivedCommand.channel.send(`Invalid time value. Must be a positive integer above 0`);
+            return;
+        } else {
+            time_value = parseInt(args[1]);
+        }
+
+        if (!_RemindValidateTimeGranularity(args[2])) {
+            receivedCommand.channel.send(`Invalid time granularity. Must be minute(s), hour(s), day(s), month(s) or year(s).`);
+            return;
+        } else {
+            time_granularity = args[2];
+        }
+        
+        for (var i=4; i<args.length - 1; i++) {
+            reminder_content = reminder_content.concat(args[i], ' ');
+        }
+        reminder_content = reminder_content.concat(args[args.length - 1]);
+
+        const user_id = receivedCommand.author.id;
+        const channel_id = receivedCommand.channel.id;
+        const creation_date = receivedCommand.createdAt;
+        const expiration_date = _RemindComputeExpirationDate(creation_date, time_value, time_granularity);
+        const content = reminder_content;
+
+        var rowID = 0;
+
+        const clientDB = await pool.connect(); {
+            const creation_date_ts = creation_date.toGMTString();
+            const expiration_date_ts = expiration_date.toGMTString();
+            const query_text = 'INSERT INTO reminders(user_id, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+            const query_values = [user_id, channel_id, creation_date_ts, expiration_date_ts, content];
+            const result = await clientDB.query(query_text, query_values);
+            rowID = result.rows[0].id;
+        } clientDB.release();
+
+        setTimeout((async () => {
+            receivedCommand.channel.send("Hey ".concat(receivedCommand.author.toString() + ", don't forget to " + content));
+
+            const clientDB = await pool.connect(); {
+                const query_text = `DELETE FROM reminders WHERE reminders.id = `.concat(rowID, ";");
+                const result = await clientDB.query(query_text);
+                console.log(result);
+            } clientDB.release();
+        }), expiration_date.getTime() - creation_date.getTime());
+
+        receivedCommand.channel.send('Ok '.concat(receivedCommand.author.toString()));
+    }
 }
 
 ///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
