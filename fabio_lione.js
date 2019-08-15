@@ -33,7 +33,7 @@ client.on('ready', async () => {
         ToggleWeeklyReleasesFeature();
 
         const clientDB = await pool.connect(); {
-            const result = await clientDB.query('SELECT * FROM current_posts');
+            const result = await clientDB.query('SELECT * FROM reminders');
             const results = { 'results': (result) ? result.rows : null };
             console.log(results);
         } clientDB.release();
