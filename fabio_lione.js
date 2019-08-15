@@ -3,8 +3,15 @@
 const config = require('./config');
 
 const request = require('request');
+
 const Discord = require('discord.js');
 const client = new Discord.Client();
+
+const { Pool } = require('pg');
+const pool = new Pool({
+    connectionString: config.database_url,
+    ssl: true
+});
 
 //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
 var weeklyReleasesIsActive = false;
@@ -17,12 +24,19 @@ var lastRecommendationsID = 0;      //Recommendations for the Week thread.
 
 client.login(config.bot_secret);
 
-client.on('ready', () => {
+client.on('ready', async () => {
     if (config.is_in_maintenance) {
         console.log('Connected as ', client.user.tag, ' (Down for Maintenance)');
     } else {
         console.log('Connected as ', client.user.tag);
+
         ToggleWeeklyReleasesFeature();
+
+        const clientDB = await pool.connect(); {
+            const result = await clientDB.query('SELECT * FROM current_posts');
+            const results = { 'results': (result) ? result.rows : null };
+            console.log(results);
+        } clientDB.release();
     }
 });
 
@@ -138,6 +152,8 @@ function processCommand(receivedCommand) {
         SetCommand(args, receivedCommand);
     } else if (command === "corgi" || command === "corgo") {
         CorgiCommand(args, receivedCommand);
+    } else if (command === "shibe" || command === "shiba") {
+        ShibeCommand(args, receivedCommand);
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
     }
@@ -152,9 +168,8 @@ List of available commands:
         Use: '\\help command_name' for a detailed explanation of the command.
     \\toggle: Toggle features on or off.
     \\set: Change internal variables to customize behavior.
-    \\corgi: Fresh corgi content.
-    \\corgo: Fresh corgo content.
-    \\sabaton: s a b a t o n k`);
+    \\corgi or \\corgo: Fresh corgi content.
+    \\shibe or \\shiba: Fresh shibe content.`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
@@ -164,6 +179,8 @@ List of available commands:
             receivedCommand.channel.send(`Set a variable value to something else. Use: '\\set list' to see what can be toggled.`);
         } else if (args[0] === 'corgi' || args[0] === 'corgo') {
             receivedCommand.channel.send(`Searches reddit for a good ol' corgo.`);
+        } else if (args[0] === 'shibe' || args[0] === 'shiba') {
+            receivedCommand.channel.send(`Searches reddit for a good ol' shiba.`);
         } else if (args[0] === 'sabaton') {
             receivedCommand.channel.send(`Then the winged hussars arrived!`);
         } else {
@@ -228,29 +245,11 @@ This is a list of all settable variables:
 }
 
 function CorgiCommand(args, receivedCommand) {
-    const channelID = receivedCommand.channel.id;
+    SendImageFromSubredditList(receivedCommand, config.corgi_list);
+}
 
-    const randomCorgiListID = getRandomIntInRange(0, 3);
-    const corgiURL = config.corgi_list[randomCorgiListID];
-
-    console.log("Getting a fresh corgi from ".concat(corgiURL));
-    request.get({
-        url: corgiURL,
-        json: true,
-        headers: { 'User-Agent': 'request' }
-    }, (err, res, data) => {
-        if (err) {
-            console.log('Error: '.concat(err, ' -- Quitting function.'));
-        } else if (res.statusCode !== 200) {
-            console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
-        } else {
-            console.log('URL ('.concat(corgiURL, ') retrieved data successfully.'));
-            
-            const redditPost = data[0].data.children[0].data;
-            console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
-            client.channels.get(channelID).send(redditPost.url);
-        }
-    });
+function ShibeCommand(args, receivedCommand) {
+    SendImageFromSubredditList(receivedCommand, config.shibe_list);
 }
 
 function SabatonCommand(args, receivedCommand) {
@@ -310,6 +309,37 @@ function getRandomIntInRange(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+//TODO (carlos): This should only get images and videos.
+function SendImageFromSubredditList(receivedCommand, list) {
+    const channelID = receivedCommand.channel.id; 
+
+    const randomListID = getRandomIntInRange(0, list.length - 1);
+    const url = list[randomListID];
+
+    console.log("Getting a fresh image from ".concat(url));
+    return request.get({
+        url: url,
+        json: true,
+        headers: { 'User-Agent': 'request' }
+    }, (err, res, data) => {
+        if (err) {
+            console.log('Error: '.concat(err, ' -- Quitting function.'));
+            return null;
+        } else if (res.statusCode !== 200) {
+            console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
+            return null;
+        } else {
+            console.log('URL ('.concat(url, ') retrieved data successfully.'));
+
+            const redditPost = data[0].data.children[0].data;
+            if (redditPost) {   
+                console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
+                client.channels.get(channelID).send(redditPost.url);
+            }
+        }
+    });
 }
 
 //⚒⚒⚒Madwave is forever⚒⚒⚒\\

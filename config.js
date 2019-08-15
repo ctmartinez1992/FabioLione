@@ -7,7 +7,8 @@ let heroku_config = new aws.S3({
     weekly_releases_reddit_url:				process.env.WEEKLY_RELEASES_REDDIT_URL,
     chat_channel_ids:						process.env.CHAT_CHANNEL_IDS,
     corgi_list:                             process.env.CORGI_LIST,
-    shibe_list:                             process.env.SHIBE_LIST
+    shibe_list:                             process.env.SHIBE_LIST,
+    database_url:                           process.env.DATABASE_URL,
 });
 
 var _is_in_maintenance = true;
@@ -23,4 +24,5 @@ module.exports = {
     chat_channel_ids:						JSON.parse(heroku_config.config.chat_channel_ids),
     corgi_list:						        JSON.parse(heroku_config.config.corgi_list),
     shibe_list:						        JSON.parse(heroku_config.config.shibe_list),
+    database_url:                           heroku_config.config.database_url,
 };
