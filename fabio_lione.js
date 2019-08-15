@@ -52,7 +52,7 @@ client.on('ready', async () => {
                     const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
                     await clientDB.query(query);
                 } else {
-                    _SetReminder(row.user_id, row.user_name, row.channel_id, row.creation_date, row.expiration_date, row.content, false);
+                    _SetReminder(row.user_id, row.user_name, row.channel_id, row.creation_date, row.expiration_date, row.content, false, false, row.id);
                 }
             });
         } clientDB.release();
@@ -164,15 +164,17 @@ function _ProcessWeeklyRelease(lastID, redditPostID, trimmedTitle, stringToCompa
     return lastID;
 }
 
-async function _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, use_creation_date) {
-    var rowID = 0;
+async function _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, use_creation_date, insert_into_db, row_id=0) {
+    var rowID = row_id;
 
-    const clientDB = await pool.connect(); {
-        const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-        const query_values = [user_id, user_name, channel_id, creation_date.toGMTString(), expiration_date.toGMTString(), content];
-        const result = await clientDB.query(query_text, query_values);
-        rowID = result.rows[0].id;
-    } clientDB.release();
+    if (insert_into_db) {
+        const clientDB = await pool.connect(); {
+            const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+            const query_values = [user_id, user_name, channel_id, creation_date.toGMTString(), expiration_date.toGMTString(), content];
+            const result = await clientDB.query(query_text, query_values);
+            rowID = result.rows[0].id;
+        } clientDB.release();
+    }
 
     var timeout = 0;
     if (use_creation_date) {
@@ -430,7 +432,7 @@ async function RemindCommand(args, receivedCommand) {
         const expiration_date = _RemindComputeExpirationDate(creation_date, time_value, time_granularity);
         const content = reminder_content;
 
-        _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, true)
+        _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, true, true)
 
         receivedCommand.channel.send('Ok '.concat(receivedCommand.author.toString()));
     } else {
