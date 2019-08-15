@@ -1,6 +1,6 @@
 'use strict';
 
-const config = require('./my_config');
+const config = require('./config');
 
 const request = require('request');
 
@@ -33,9 +33,28 @@ client.on('ready', async () => {
         ToggleWeeklyReleasesFeature();
 
         const clientDB = await pool.connect(); {
-            const result = await clientDB.query('SELECT * FROM reminders');
-            const results = { 'results': (result) ? result.rows : null };
-            console.log(results);
+            var result = await clientDB.query('SELECT * FROM last_posts');
+            result.rows.forEach(function(row) {
+                if (row.name === "general_discussion") {
+                    lastGeneralID = row.post_id;
+                } else if (row.name === "weekly_releases") {
+                    lastThisWeekID = row.post_id;
+                } else if (row.name === "been_listening") {
+                    lastListeningID = row.post_id;
+                } else if (row.name === "weekly_recommendations") {
+                    lastRecommendationsID = row.post_id;
+                }
+            });
+
+            result = await clientDB.query('SELECT * FROM reminders');
+            result.rows.forEach(async function(row) {
+                if (row.expiration_date.getTime() > (new Date()).getTime()) {
+                    const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
+                    await clientDB.query(query);
+                } else {
+                    _SetReminder(row.user_id, row.user_name, row.channel_id, row.creation_date, row.expiration_date, row.content, false);
+                }
+            });
         } clientDB.release();
     }
 });
@@ -84,6 +103,13 @@ function SetWeeklyReleasesInterval(newInterval) {
     weeklyReleasesFuncObj = setInterval(ProcessWeeklyReleases, weeklyReleasesInterval);
 }
 
+async function _UpdateLastPost(new_post_id, name) {
+    const clientDB = await pool.connect(); {
+        const query = `UPDATE last_posts SET post_id = '`.concat(new_post_id, `' WHERE name ='`, name, `';`);
+        const result = await clientDB.query(query);
+    } clientDB.release();
+}
+
 function ProcessWeeklyReleases() {
     console.log("Getting the last 3 posts and searching for a fresh weekly releases thread...");
     request.get({
@@ -106,10 +132,20 @@ function ProcessWeeklyReleases() {
 
                 const trimmedTitle = redditPost.title.toLowerCase().trim();
 
+                var _generalID = lastGeneralID;
+                var _thisWeekID = lastThisWeekID;
+                var _listeningID = lastListeningID;
+                var _recommendationsID = lastRecommendationsID;
+
                 lastGeneralID = _ProcessWeeklyRelease(lastGeneralID, redditPost.id, trimmedTitle, "general discussion", redditPost.url);
                 lastThisWeekID = _ProcessWeeklyRelease(lastThisWeekID, redditPost.id, trimmedTitle, "this week in power metal releases", redditPost.url);
                 lastListeningID = _ProcessWeeklyRelease(lastListeningID, redditPost.id, trimmedTitle, "this week i've been listening to...", redditPost.url);
                 lastRecommendationsID = _ProcessWeeklyRelease(lastRecommendationsID, redditPost.id, trimmedTitle, "recommendations for the week", redditPost.url);
+
+                if (_generalID !== lastGeneralID)                       _UpdateLastPost(lastGeneralID, "general_discussion");
+                if (_thisWeekID !== lastThisWeekID)                     _UpdateLastPost(lastThisWeekID, "weekly_releases");
+                if (_listeningID !== lastListeningID)                   _UpdateLastPost(lastListeningID, "been_listening");
+                if (_recommendationsID !== lastRecommendationsID)       _UpdateLastPost(lastRecommendationsID, "weekly_recommendations");
             }
         }
     });
@@ -126,6 +162,33 @@ function _ProcessWeeklyRelease(lastID, redditPostID, trimmedTitle, stringToCompa
         return redditPostID;
     }
     return lastID;
+}
+
+async function _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, use_creation_date) {
+    var rowID = 0;
+
+    const clientDB = await pool.connect(); {
+        const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+        const query_values = [user_id, user_name, channel_id, creation_date.toGMTString(), expiration_date.toGMTString(), content];
+        const result = await clientDB.query(query_text, query_values);
+        rowID = result.rows[0].id;
+    } clientDB.release();
+
+    var timeout = 0;
+    if (use_creation_date) {
+        timeout = expiration_date.getTime() - creation_date.getTime();
+    } else {
+        timeout = expiration_date.getTime() - (new Date).getTime();
+    }
+
+    setTimeout((async () => {
+        client.channels.get(channel_id).send("Hey ".concat(user_name + ", don't forget to " + content));
+
+        const clientDB = await pool.connect(); {
+            const query_text = `DELETE FROM reminders WHERE reminders.id = `.concat(rowID, ";");
+            await clientDB.query(query_text);
+        } clientDB.release();
+    }), timeout);
 }
 
 // /$$$$$$\                                                                  $$\           
@@ -171,7 +234,9 @@ List of available commands:
     \\toggle: Toggle features on or off.
     \\set: Change internal variables to customize behavior.
     \\corgi or \\corgo: Fresh corgi content.
-    \\shibe or \\shiba: Fresh shibe content.`);
+    \\shibe or \\shiba: Fresh shibe content.
+    \\sabaton: For some sick dududu beats.
+    \\remind: To help you remind of whatever you want.`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
@@ -185,6 +250,14 @@ List of available commands:
             receivedCommand.channel.send(`Searches reddit for a good ol' shiba.`);
         } else if (args[0] === 'sabaton') {
             receivedCommand.channel.send(`Then the winged hussars arrived!`);
+        } else if (args[0] === 'remind') {
+            receivedCommand.channel.send(`\n
+Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use:
+\\remind in time_value time_granularity to reminder_content
+    * time_value can be any positive integer above 0;
+    * time_granularity can be minute(s), hour(s), day(s), month(s), year(s);
+    * reminder_content is what you want to be reminded of;
+    * NOTE: The 'in' and 'to' words need to be there, they don't need to be in or to respectively, they just need to be a word.`);
         } else {
             receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
         }
@@ -325,15 +398,8 @@ function _RemindComputeExpirationDate(creation_date, time_value, time_granularit
 
 async function RemindCommand(args, receivedCommand) {
     if (args.length <= 0) {
-        receivedCommand.channel.send(`\n
-Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use:
-\\remind in time_value time_granularity to reminder_content
-  * time_value can be any positive integer above 0;
-  * time_granularity can be minute(s), hour(s), day(s), month(s), year(s);
-  * reminder_content is what you want to be reminded of;
-  * NOTE: The in and to words need to be there, they don't need to be in or to respectively, they just need to be a word.`
-        );
-    } else {
+        receivedCommand.channel.send(`Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use '\\help remind' for more information.`);
+    } else if (args.length >= 5) {
         var time_value = 0;
         var time_granularity = "";
         var reminder_content = "";
@@ -358,33 +424,17 @@ Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡�
         reminder_content = reminder_content.concat(args[args.length - 1]);
 
         const user_id = receivedCommand.author.id;
+        const user_name = receivedCommand.author.toString();
         const channel_id = receivedCommand.channel.id;
         const creation_date = receivedCommand.createdAt;
         const expiration_date = _RemindComputeExpirationDate(creation_date, time_value, time_granularity);
         const content = reminder_content;
 
-        var rowID = 0;
-
-        const clientDB = await pool.connect(); {
-            const creation_date_ts = creation_date.toGMTString();
-            const expiration_date_ts = expiration_date.toGMTString();
-            const query_text = 'INSERT INTO reminders(user_id, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5) RETURNING *';
-            const query_values = [user_id, channel_id, creation_date_ts, expiration_date_ts, content];
-            const result = await clientDB.query(query_text, query_values);
-            rowID = result.rows[0].id;
-        } clientDB.release();
-
-        setTimeout((async () => {
-            receivedCommand.channel.send("Hey ".concat(receivedCommand.author.toString() + ", don't forget to " + content));
-
-            const clientDB = await pool.connect(); {
-                const query_text = `DELETE FROM reminders WHERE reminders.id = `.concat(rowID, ";");
-                const result = await clientDB.query(query_text);
-                console.log(result);
-            } clientDB.release();
-        }), expiration_date.getTime() - creation_date.getTime());
+        _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, true)
 
         receivedCommand.channel.send('Ok '.concat(receivedCommand.author.toString()));
+    } else {
+        receivedCommand.channel.send(`Invalid number of arguments. Use '\\help remind' for more information.`);
     }
 }
 
