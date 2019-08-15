@@ -48,8 +48,7 @@ client.on('ready', async () => {
 
             result = await clientDB.query('SELECT * FROM reminders');
             result.rows.forEach(async function(row) {
-                console.log(row.expiration_date.getTime().toString().concat(' - ', (new Date()).getTime()));
-                if (row.expiration_date.getTime() > (new Date()).getTime()) {
+                if (row.expiration_date.getTime() < (new Date()).getTime()) {
                     const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
                     await clientDB.query(query);
                 } else {
@@ -180,7 +179,6 @@ async function _SetReminder(user_id, user_name, channel_id, creation_date, expir
         timeout = expiration_date.getTime() - creation_date.getTime();
     } else {
         timeout = expiration_date.getTime() - (new Date).getTime();
-        console.log(timeout);
     }
 
     setTimeout((async () => {
