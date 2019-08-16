@@ -223,6 +223,8 @@ function processCommand(receivedCommand) {
         SabatonCommand(args, receivedCommand);
     } else if (command === "remind") {
         RemindCommand(args, receivedCommand);
+    } else if (command === "wrong") {
+        WrongCommand(args, receivedCommand);
     }
 }
 
@@ -238,7 +240,8 @@ List of available commands:
     \\corgi or \\corgo: Fresh corgi content.
     \\shibe or \\shiba: Fresh shibe content.
     \\sabaton: For some sick dududu beats.
-    \\remind: To help you remind of whatever you want.`);
+    \\remind: To help you remind of whatever you want.
+    \\wrong: When you're right.`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
@@ -260,6 +263,8 @@ Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡�
     * time_granularity can be minute(s), hour(s), day(s), month(s), year(s);
     * reminder_content is what you want to be reminded of;
     * NOTE: The 'in' and 'to' words need to be there, they don't need to be in or to respectively, they just need to be a word.`);
+        } else if (args[0] === 'wrong') {
+            receivedCommand.channel.send(`Share a nice argument-winning gif`);
         } else {
             receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
         }
@@ -440,6 +445,10 @@ async function RemindCommand(args, receivedCommand) {
     }
 }
 
+function WrongCommand(args, receivedCommand) {
+    SendImageFromLinkList(receivedCommand, config.wrong_list);
+}
+
 ///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
 //|$$ |  $$ |  $$ |    \__|$$ |\__|  $$ |    \__|                    
 //|$$ |  $$ |$$$$$$\   $$\ $$ |$$\ $$$$$$\   $$\  $$$$$$\   $$$$$$$\ 
@@ -491,6 +500,16 @@ function SendImageFromSubredditList(receivedCommand, list) {
             }
         }
     });
+}
+
+function SendImageFromLinkList(receivedCommand, list) {
+    const channelID = receivedCommand.channel.id; 
+
+    const randomListID = getRandomIntInRange(0, list.length - 1);
+    const url = list[randomListID];
+
+    console.log('Sending this URL ('.concat(url, ') to channel.'));
+    client.channels.get(channelID).send(url);
 }
 
 //⚒⚒⚒Madwave is forever⚒⚒⚒\\
