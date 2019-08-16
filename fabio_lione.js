@@ -225,6 +225,8 @@ function processCommand(receivedCommand) {
         RemindCommand(args, receivedCommand);
     } else if (command === "wrong") {
         WrongCommand(args, receivedCommand);
+    } else if (command === "pathetic") {
+        PatheticCommand(args, receivedCommand);
     }
 }
 
@@ -241,7 +243,8 @@ List of available commands:
     \\shibe or \\shiba: Fresh shibe content.
     \\sabaton: For some sick dududu beats.
     \\remind: To help you remind of whatever you want.
-    \\wrong: When you're right.`);
+    \\wrong: When you're right.
+    \\pathetic: When you're right and disappointed.`);
     } else {
         if (args[0] === 'help') {
             receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
@@ -265,6 +268,8 @@ Fabio will guestfully remind you of whatever you need, no matter how dirty ( Í¡Â
     * NOTE: The 'in' and 'to' words need to be there, they don't need to be in or to respectively, they just need to be a word.`);
         } else if (args[0] === 'wrong') {
             receivedCommand.channel.send(`Share a nice argument-winning gif`);
+        } else if (args[0] === 'pathetic') {
+            receivedCommand.channel.send(`Share a nicer argument-winning gif`);
         } else {
             receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
         }
@@ -447,6 +452,10 @@ async function RemindCommand(args, receivedCommand) {
 
 function WrongCommand(args, receivedCommand) {
     SendImageFromLinkList(receivedCommand, config.wrong_list);
+}
+
+function PatheticCommand(args, receivedCommand) {
+    SendImageFromLinkList(receivedCommand, config.pathetic_list);
 }
 
 ///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
