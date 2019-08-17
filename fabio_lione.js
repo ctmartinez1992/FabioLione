@@ -1,6 +1,8 @@
 'use strict';
 
-const config = require('./config');
+const utils = require('./utils');
+const config = require('./my_config');
+const reminders = require('./feats/reminders');
 
 const request = require('request');
 
@@ -46,15 +48,7 @@ client.on('ready', async () => {
                 }
             });
 
-            result = await clientDB.query('SELECT * FROM reminders');
-            result.rows.forEach(async function(row) {
-                if (row.expiration_date.getTime() < (new Date()).getTime()) {
-                    const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
-                    await clientDB.query(query);
-                } else {
-                    _SetReminder(row.user_id, row.user_name, row.channel_id, row.creation_date, row.expiration_date, row.content, false, false, row.id);
-                }
-            });
+            await reminders.Init(client, clientDB);
         } clientDB.release();
     }
 });
@@ -76,7 +70,7 @@ client.on('message', (receivedCommand) => {
 function ToggleWeeklyReleasesFeature() {
     weeklyReleasesIsActive = !weeklyReleasesIsActive;
     if (weeklyReleasesIsActive) {
-        console.log('Turning weekly releases feature on. Interval (', millisToMinutesAndSeconds(weeklyReleasesInterval), ').');
+        console.log('Turning weekly releases feature on. Interval (', utils.MillisToMinutesAndSeconds(weeklyReleasesInterval), ').');
         weeklyReleasesFuncObj = setInterval(ProcessWeeklyReleases, weeklyReleasesInterval);
     } else {
         if (weeklyReleasesFuncObj) {
@@ -97,7 +91,7 @@ function CleanWeeklyReleasesInterval(newInterval) {
 }
 
 function SetWeeklyReleasesInterval(newInterval) {
-    console.log('Setting weekly interval from '.concat(millisToMinutesAndSeconds(weeklyReleasesInterval), ' to ', millisToMinutesAndSeconds(newInterval)));
+    console.log('Setting weekly interval from '.concat(utils.MillisToMinutesAndSeconds(weeklyReleasesInterval), ' to ', utils.MillisToMinutesAndSeconds(newInterval)));
     weeklyReleasesInterval = newInterval;
     clearInterval(weeklyReleasesFuncObj);
     weeklyReleasesFuncObj = setInterval(ProcessWeeklyReleases, weeklyReleasesInterval);
@@ -106,7 +100,7 @@ function SetWeeklyReleasesInterval(newInterval) {
 async function _UpdateLastPost(new_post_id, name) {
     const clientDB = await pool.connect(); {
         const query = `UPDATE last_posts SET post_id = '`.concat(new_post_id, `' WHERE name ='`, name, `';`);
-        const result = await clientDB.query(query);
+        await clientDB.query(query);
     } clientDB.release();
 }
 
@@ -164,35 +158,6 @@ function _ProcessWeeklyRelease(lastID, redditPostID, trimmedTitle, stringToCompa
     return lastID;
 }
 
-async function _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, use_creation_date, insert_into_db, row_id=0) {
-    var rowID = row_id;
-
-    if (insert_into_db) {
-        const clientDB = await pool.connect(); {
-            const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-            const query_values = [user_id, user_name, channel_id, creation_date.toGMTString(), expiration_date.toGMTString(), content];
-            const result = await clientDB.query(query_text, query_values);
-            rowID = result.rows[0].id;
-        } clientDB.release();
-    }
-
-    var timeout = 0;
-    if (use_creation_date) {
-        timeout = expiration_date.getTime() - creation_date.getTime();
-    } else {
-        timeout = expiration_date.getTime() - (new Date).getTime();
-    }
-
-    setTimeout((async () => {
-        client.channels.get(channel_id).send("Hey ".concat(user_name + ", don't forget to " + content));
-
-        const clientDB = await pool.connect(); {
-            const query_text = `DELETE FROM reminders WHERE reminders.id = `.concat(rowID, ";");
-            await clientDB.query(query_text);
-        } clientDB.release();
-    }), timeout);
-}
-
 // /$$$$$$\                                                                  $$\           
 //|$$  __$$\                                                                 $$ |          
 //|$$ /  \__| $$$$$$\  $$$$$$\$$$$\  $$$$$$\$$$$\   $$$$$$\  $$$$$$$\   $$$$$$$ | $$$$$$$\ 
@@ -202,7 +167,7 @@ async function _SetReminder(user_id, user_name, channel_id, creation_date, expir
 // \$$$$$$  |\$$$$$$  |$$ | $$ | $$ |$$ | $$ | $$ |\$$$$$$$ |$$ |  $$ |\$$$$$$$ |$$$$$$$  |
 //  \______/  \______/ \__| \__| \__|\__| \__| \__| \_______|\__|  \__| \_______|\_______/ 
 
-function processCommand(receivedCommand) {
+async function processCommand(receivedCommand) {
     let fullCommand = receivedCommand.content.substr(1);
     let splitCommand = fullCommand.split(' ');
     let command = splitCommand[0];
@@ -222,7 +187,9 @@ function processCommand(receivedCommand) {
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
     } else if (command === "remind") {
-        RemindCommand(args, receivedCommand);
+        const clientDB = await pool.connect(); {
+            await reminders.RemindCommand(args, receivedCommand, client, clientDB);
+        } clientDB.release();
     } else if (command === "wrong") {
         WrongCommand(args, receivedCommand);
     } else if (command === "pathetic") {
@@ -322,7 +289,7 @@ This is a list of all settable variables:
         } else if (args.length === 3) {
             if (args[0] === 'weekly' && args[1] === 'interval') {
                 const newInterval = CleanWeeklyReleasesInterval(parseInt(args[2], 10)) || weeklyReleasesIntervalDefault;
-                receivedCommand.channel.send('Setting weekly releases interval from '.concat(millisToMinutesAndSeconds(weeklyReleasesInterval), ' to ', millisToMinutesAndSeconds(newInterval)));
+                receivedCommand.channel.send('Setting weekly releases interval from '.concat(utils.MillisToMinutesAndSeconds(weeklyReleasesInterval), ' to ', utils.MillisToMinutesAndSeconds(newInterval)));
                 SetWeeklyReleasesInterval(newInterval);
             }
         } else {
@@ -342,13 +309,12 @@ function ShibeCommand(args, receivedCommand) {
 function SabatonCommand(args, receivedCommand) {
     const channelID = receivedCommand.channel.id;
 
-    var rng = getRandomIntInRange(6, 24);
+    var rng = utils.GetRandomIntInRange(6, 24);
     var string = "";
-    var skip = false;
     
     for (var i = 0; i < rng; i++) {
-        var style = getRandomIntInRange(1, 8);
-        var space = getRandomIntInRange(1, 4);
+        var style = utils.GetRandomIntInRange(1, 8);
+        var space = utils.GetRandomIntInRange(1, 4);
 
         if (style === 1) {
             string += "du";
@@ -376,80 +342,6 @@ function SabatonCommand(args, receivedCommand) {
     client.channels.get(channelID).send(string);
 }
 
-function _RemindValidateTimeValue(value) {
-    return /^\+?[1-9][\d]*$/.test(value);
-}
-
-function _RemindValidateTimeGranularity(value) {
-    return (value === "minute" || value === "minutes" ||
-            value === "hour" || value === "hours" ||
-            value === "day" || value === "days" ||
-            value === "month" || value === "months" ||
-            value === "year" || value === "years");
-}
-
-const MILLIS_IN_YEAR   = 31557600 * 1000;
-const MILLIS_IN_MONTH  = 2678400 * 1000;
-const MILLIS_IN_DAY    = 86400 * 1000;
-const MILLIS_IN_HOUR   = 3600 * 1000;
-const MILLIS_IN_MINUTE = 60 * 1000;
-function _RemindComputeExpirationDate(creation_date, time_value, time_granularity) {
-    if (time_granularity === "year" || time_granularity === "years") {
-        return new Date(creation_date.getTime() + (MILLIS_IN_YEAR * time_value));
-    } else if (time_granularity === "month" || time_granularity === "months") {
-        return new Date(creation_date.getTime() + (MILLIS_IN_MONTH * time_value));
-    } else if (time_granularity === "day" || time_granularity === "days") {
-        return new Date(creation_date.getTime() + (MILLIS_IN_DAY * time_value));
-    } else if (time_granularity === "hours" || time_granularity === "hours") {
-        return new Date(creation_date.getTime() + (MILLIS_IN_HOUR * time_value));
-    } else if (time_granularity === "minute" || time_granularity === "minutes") {
-        return new Date(creation_date.getTime() + (MILLIS_IN_MINUTE * time_value));
-    }
-    return new Date(creation_date.getTime() + (MILLIS_IN_MINUTE * 1));
-}
-
-async function RemindCommand(args, receivedCommand) {
-    if (args.length <= 0) {
-        receivedCommand.channel.send(`Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use '\\help remind' for more information.`);
-    } else if (args.length >= 5) {
-        var time_value = 0;
-        var time_granularity = "";
-        var reminder_content = "";
-
-        if (!_RemindValidateTimeValue(args[1])) {
-            receivedCommand.channel.send(`Invalid time value. Must be a positive integer above 0`);
-            return;
-        } else {
-            time_value = parseInt(args[1]);
-        }
-
-        if (!_RemindValidateTimeGranularity(args[2])) {
-            receivedCommand.channel.send(`Invalid time granularity. Must be minute(s), hour(s), day(s), month(s) or year(s).`);
-            return;
-        } else {
-            time_granularity = args[2];
-        }
-        
-        for (var i=4; i<args.length - 1; i++) {
-            reminder_content = reminder_content.concat(args[i], ' ');
-        }
-        reminder_content = reminder_content.concat(args[args.length - 1]);
-
-        const user_id = receivedCommand.author.id;
-        const user_name = receivedCommand.author.toString();
-        const channel_id = receivedCommand.channel.id;
-        const creation_date = receivedCommand.createdAt;
-        const expiration_date = _RemindComputeExpirationDate(creation_date, time_value, time_granularity);
-        const content = reminder_content;
-
-        _SetReminder(user_id, user_name, channel_id, creation_date, expiration_date, content, true, true)
-
-        receivedCommand.channel.send('Ok '.concat(receivedCommand.author.toString()));
-    } else {
-        receivedCommand.channel.send(`Invalid number of arguments. Use '\\help remind' for more information.`);
-    }
-}
-
 function WrongCommand(args, receivedCommand) {
     SendImageFromLinkList(receivedCommand, config.wrong_list);
 }
@@ -467,24 +359,11 @@ function PatheticCommand(args, receivedCommand) {
 // \$$$$$$  |  \$$$$  |$$ |$$ |$$ |  \$$$$  |$$ |\$$$$$$$\ $$$$$$$  |
 //  \______/    \____/ \__|\__|\__|   \____/ \__| \_______|\_______/ 
 
-function millisToMinutesAndSeconds(millis) {
-    var minutes = Math.floor(millis / 60000);
-    var seconds = ((millis % 60000) / 1000).toFixed(0);
-    return (minutes + ":" + (seconds < 10 ? '0' : '') + seconds);
-}
-
-//min and max are inclusive.
-function getRandomIntInRange(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
 //TODO (carlos): This should only get images and videos.
 function SendImageFromSubredditList(receivedCommand, list) {
     const channelID = receivedCommand.channel.id; 
 
-    const randomListID = getRandomIntInRange(0, list.length - 1);
+    const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
     const url = list[randomListID];
 
     console.log("Getting a fresh image from ".concat(url));
@@ -514,7 +393,7 @@ function SendImageFromSubredditList(receivedCommand, list) {
 function SendImageFromLinkList(receivedCommand, list) {
     const channelID = receivedCommand.channel.id; 
 
-    const randomListID = getRandomIntInRange(0, list.length - 1);
+    const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
     const url = list[randomListID];
 
     console.log('Sending this URL ('.concat(url, ') to channel.'));
