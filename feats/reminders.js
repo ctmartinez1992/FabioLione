@@ -13,20 +13,22 @@ module.exports = {
     //Gets all reminders and:
     //  * Deletes those who are past their expiration date;
     //  * Sets reminders for those who are yet to expire with the remaining time.
-    Init: async function(client, clientDB) {
-        const result = await clientDB.query('SELECT * FROM reminders');
-        result.rows.forEach(async function(row) {
-            if (row.expiration_date.getTime() < (new Date()).getTime()) {
-                const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
-                await clientDB.query(query);
-            } else {
-                const reminder = Reminder(row.id, row.user_id, row.user_name, row.channel_id, row.creation_date, row.expiration_date, row.content);
-                _set_existing_reminder(client, clientDB, reminder);
-            }
-        });
+    Init: async function(client, pool) {
+        const clientDB = await pool.connect(); {
+            const result = await clientDB.query('SELECT * FROM reminders');
+            result.rows.forEach(async function(row) {
+                if (row.expiration_date.getTime() < (new Date()).getTime()) {
+                    const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
+                    await clientDB.query(query);
+                } else {
+                    const reminder = Reminder(row.id, row.user_id, row.user_name, row.channel_id, row.creation_date, row.expiration_date, row.content);
+                    _set_existing_reminder(client, pool, reminder);
+                }
+            });
+        } clientDB.release();
     },
 
-    RemindCommand: async function(args, receivedCommand, client, clientDB) {
+    RemindCommand: async function(args, receivedCommand, client, pool) {
         if (args.length <= 0) {
             receivedCommand.channel.send(`Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use '\\help remind' for more information.`);
         } else if (args.length >= 5) {
@@ -61,7 +63,7 @@ module.exports = {
             const content = reminder_content;
             const reminder = Reminder(0, user_id, user_name, channel_id, creation_date, expiration_date, content);
 
-            _new_reminder(client, clientDB, reminder);
+            _new_reminder(client, pool, reminder);
 
             receivedCommand.channel.send('Ok '.concat(receivedCommand.author.toString()));
         } else {
@@ -71,27 +73,31 @@ module.exports = {
 }
 
 //r - See struct Reminder.
-async function _new_reminder(client, clientDB, r) {
-    const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
-    const query_values = [r.user_id, r.user_name, r.channel_id, r.creation_date.toGMTString(), r.expiration_date.toGMTString(), r.content];
-    const result = await clientDB.query(query_text, query_values);
+async function _new_reminder(client, pool, r) {
+    const clientDB = await pool.connect(); {
+        const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
+        const query_values = [r.user_id, r.user_name, r.channel_id, r.creation_date.toGMTString(), r.expiration_date.toGMTString(), r.content];
+        const result = await clientDB.query(query_text, query_values);
+    } clientDB.release();
 
     r.id = result.rows[0].id;
 
-    _set_reminder_timeout(client, clientDB, r, r.expiration_date.getTime() - r.creation_date.getTime());
+    _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - r.creation_date.getTime());
 }
 
 //r - See struct Reminder.
-async function _set_existing_reminder(client, clientDB, r) {
-    _set_reminder_timeout(client, clientDB, r, r.expiration_date.getTime() - (new Date).getTime());
+async function _set_existing_reminder(client, pool, r) {
+    _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - (new Date).getTime());
 }
 
 //r - See struct Reminder.
-async function _set_reminder_timeout(client, clientDB, r, timeout) {
+async function _set_reminder_timeout(client, pool, r, timeout) {
     setTimeout((async () => {
         client.channels.get(r.channel_id).send("Hey ".concat(r.user_name + ", don't forget to " + r.content));
-        const query = `DELETE FROM reminders WHERE reminders.id = `.concat(r.id, ";");
-        await clientDB.query(query);
+        const clientDB = await pool.connect(); {
+            const query = `DELETE FROM reminders WHERE reminders.id = `.concat(r.id, ";");
+            await clientDB.query(query);
+        } clientDB.release();
     }), timeout);
 }
 

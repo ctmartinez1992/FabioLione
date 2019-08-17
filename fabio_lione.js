@@ -48,7 +48,7 @@ client.on('ready', async () => {
                 }
             });
 
-            await reminders.Init(client, clientDB);
+            await reminders.Init(client, pool);
         } clientDB.release();
     }
 });
@@ -187,9 +187,7 @@ async function processCommand(receivedCommand) {
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
     } else if (command === "remind") {
-        const clientDB = await pool.connect(); {
-            await reminders.RemindCommand(args, receivedCommand, client, clientDB);
-        } clientDB.release();
+        await reminders.RemindCommand(args, receivedCommand, client, pool);
     } else if (command === "wrong") {
         WrongCommand(args, receivedCommand);
     } else if (command === "pathetic") {
