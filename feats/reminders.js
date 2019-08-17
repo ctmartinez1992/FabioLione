@@ -78,11 +78,9 @@ async function _new_reminder(client, pool, r) {
         const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
         const query_values = [r.user_id, r.user_name, r.channel_id, r.creation_date.toGMTString(), r.expiration_date.toGMTString(), r.content];
         const result = await clientDB.query(query_text, query_values);
+        r.id = result.rows[0].id;
+        _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - r.creation_date.getTime());
     } clientDB.release();
-
-    r.id = result.rows[0].id;
-
-    _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - r.creation_date.getTime());
 }
 
 //r - See struct Reminder.
