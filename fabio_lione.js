@@ -2,6 +2,9 @@
 
 const utils = require('./utils');
 const config = require('./config');
+
+const help = require('./feats/help');
+const images = require('./feats/images');
 const reminders = require('./feats/reminders');
 
 const request = require('request');
@@ -175,69 +178,23 @@ async function processCommand(receivedCommand) {
 
     console.log('Processing ('.concat(command, ') with arguments (', args, ').'));
     if (command === "help") {
-        HelpCommand(args, receivedCommand);
+        help.HelpCommand(args, receivedCommand);
     } else if (command === "toggle") {
         ToggleCommand(args, receivedCommand);
     } else if (command === "set") {
         SetCommand(args, receivedCommand);
     } else if (command === "corgi" || command === "corgo") {
-        CorgiCommand(args, receivedCommand);
+        images.CorgiCommand(client, args, receivedCommand);
     } else if (command === "shibe" || command === "shiba") {
-        ShibeCommand(args, receivedCommand);
+        images.ShibeCommand(client, args, receivedCommand);
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
     } else if (command === "remind") {
         await reminders.RemindCommand(args, receivedCommand, client, pool);
     } else if (command === "wrong") {
-        WrongCommand(args, receivedCommand);
+        images.WrongCommand(client, args, receivedCommand);
     } else if (command === "pathetic") {
-        PatheticCommand(args, receivedCommand);
-    }
-}
-
-function HelpCommand(args, receivedCommand) {
-    if (args.length <= 0) {
-        receivedCommand.channel.send(`\n
-Fabio Lione will tell you when a new weekly release thread was posted.
-List of available commands:
-    \\help: A list of all commands and an explanation for each.
-        Use: '\\help command_name' for a detailed explanation of the command.
-    \\toggle: Toggle features on or off.
-    \\set: Change internal variables to customize behavior.
-    \\corgi or \\corgo: Fresh corgi content.
-    \\shibe or \\shiba: Fresh shibe content.
-    \\sabaton: For some sick dududu beats.
-    \\remind: To help you remind of whatever you want.
-    \\wrong: When you're right.
-    \\pathetic: When you're right and disappointed.`);
-    } else {
-        if (args[0] === 'help') {
-            receivedCommand.channel.send(`This command will help you out. However, asking for help on the help command is ridiculous.`);
-        } else if (args[0] === 'toggle') {
-            receivedCommand.channel.send(`Toggle a feature on or off. Use: '\\toggle list' to see what can be toggled.`);
-        } else if (args[0] === 'set') {
-            receivedCommand.channel.send(`Set a variable value to something else. Use: '\\set list' to see what can be toggled.`);
-        } else if (args[0] === 'corgi' || args[0] === 'corgo') {
-            receivedCommand.channel.send(`Searches reddit for a good ol' corgo.`);
-        } else if (args[0] === 'shibe' || args[0] === 'shiba') {
-            receivedCommand.channel.send(`Searches reddit for a good ol' shiba.`);
-        } else if (args[0] === 'sabaton') {
-            receivedCommand.channel.send(`Then the winged hussars arrived!`);
-        } else if (args[0] === 'remind') {
-            receivedCommand.channel.send(`\n
-Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use:
-\\remind in time_value time_granularity to reminder_content
-    * time_value can be any positive integer above 0;
-    * time_granularity can be minute(s), hour(s), day(s), month(s), year(s);
-    * reminder_content is what you want to be reminded of;
-    * NOTE: The 'in' and 'to' words need to be there, they don't need to be in or to respectively, they just need to be a word.`);
-        } else if (args[0] === 'wrong') {
-            receivedCommand.channel.send(`Share a nice argument-winning gif`);
-        } else if (args[0] === 'pathetic') {
-            receivedCommand.channel.send(`Share a nicer argument-winning gif`);
-        } else {
-            receivedCommand.channel.send(`Unknown argument (`.concat(args[0], `) for '\\help' command. Use only '\\help'.`));
-        }
+        images.PatheticCommand(client, args, receivedCommand);
     }
 }
 
@@ -296,14 +253,6 @@ This is a list of all settable variables:
     }
 }
 
-function CorgiCommand(args, receivedCommand) {
-    SendImageFromSubredditList(receivedCommand, config.corgi_list);
-}
-
-function ShibeCommand(args, receivedCommand) {
-    SendImageFromSubredditList(receivedCommand, config.shibe_list);
-}
-
 function SabatonCommand(args, receivedCommand) {
     const channelID = receivedCommand.channel.id;
 
@@ -338,64 +287,6 @@ function SabatonCommand(args, receivedCommand) {
     }
 
     client.channels.get(channelID).send(string);
-}
-
-function WrongCommand(args, receivedCommand) {
-    SendImageFromLinkList(receivedCommand, config.wrong_list);
-}
-
-function PatheticCommand(args, receivedCommand) {
-    SendImageFromLinkList(receivedCommand, config.pathetic_list);
-}
-
-///$$\   $$\   $$\     $$\ $$\ $$\   $$\     $$\                     
-//|$$ |  $$ |  $$ |    \__|$$ |\__|  $$ |    \__|                    
-//|$$ |  $$ |$$$$$$\   $$\ $$ |$$\ $$$$$$\   $$\  $$$$$$\   $$$$$$$\ 
-//|$$ |  $$ |\_$$  _|  $$ |$$ |$$ |\_$$  _|  $$ |$$  __$$\ $$  _____|
-//|$$ |  $$ |  $$ |    $$ |$$ |$$ |  $$ |    $$ |$$$$$$$$ |\$$$$$$\  
-//|$$ |  $$ |  $$ |$$\ $$ |$$ |$$ |  $$ |$$\ $$ |$$   ____| \____$$\ 
-// \$$$$$$  |  \$$$$  |$$ |$$ |$$ |  \$$$$  |$$ |\$$$$$$$\ $$$$$$$  |
-//  \______/    \____/ \__|\__|\__|   \____/ \__| \_______|\_______/ 
-
-//TODO (carlos): This should only get images and videos.
-function SendImageFromSubredditList(receivedCommand, list) {
-    const channelID = receivedCommand.channel.id; 
-
-    const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
-    const url = list[randomListID];
-
-    console.log("Getting a fresh image from ".concat(url));
-    return request.get({
-        url: url,
-        json: true,
-        headers: { 'User-Agent': 'request' }
-    }, (err, res, data) => {
-        if (err) {
-            console.log('Error: '.concat(err, ' -- Quitting function.'));
-            return null;
-        } else if (res.statusCode !== 200) {
-            console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
-            return null;
-        } else {
-            console.log('URL ('.concat(url, ') retrieved data successfully.'));
-
-            const redditPost = data[0].data.children[0].data;
-            if (redditPost) {   
-                console.log('Sending this URL ('.concat(redditPost.url, ') to channel.'));
-                client.channels.get(channelID).send(redditPost.url);
-            }
-        }
-    });
-}
-
-function SendImageFromLinkList(receivedCommand, list) {
-    const channelID = receivedCommand.channel.id; 
-
-    const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
-    const url = list[randomListID];
-
-    console.log('Sending this URL ('.concat(url, ') to channel.'));
-    client.channels.get(channelID).send(url);
 }
 
 //⚒⚒⚒Madwave is forever⚒⚒⚒\\
