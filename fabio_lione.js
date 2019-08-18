@@ -213,6 +213,8 @@ async function processCommand(receivedCommand) {
         images.PatheticCommand(client, args, receivedCommand);
     } else if (command === "longest" || command === "longestsong" || command === "longest_song") {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=ybGOT4d2Hs8');
+    } else if (command === "aoty") {
+        receivedCommand.channel.send('https://www.youtube.com/watch?v=n03AEI2NiKM');
     }
 }
 
