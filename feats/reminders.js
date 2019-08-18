@@ -18,6 +18,7 @@ module.exports = {
             const result = await clientDB.query('SELECT * FROM reminders');
             result.rows.forEach(async function(row) {
                 if (row.expiration_date.getTime() < (new Date()).getTime()) {
+                    console.log('Reminder (', row.id, ') has expired and will be removed.');
                     const query = `DELETE FROM reminders WHERE reminders.id = `.concat(row.id, ";");
                     await clientDB.query(query);
                 } else {
@@ -37,14 +38,14 @@ module.exports = {
             var reminder_content = "";
 
             if (!_validate_time_value(args[1])) {
-                receivedCommand.channel.send(`Invalid time value. Must be a positive integer above 0`);
+                receivedCommand.channel.send(`Invalid time value (`, args[1] ,`). Must be a positive integer above 0`);
                 return;
             } else {
                 time_value = parseInt(args[1]);
             }
 
             if (!_validate_time_granularity(args[2])) {
-                receivedCommand.channel.send(`Invalid time granularity. Must be minute(s), hour(s), day(s), month(s) or year(s).`);
+                receivedCommand.channel.send(`Invalid time granularity (`, args[1] ,`). Must be minute(s), hour(s), day(s), month(s) or year(s).`);
                 return;
             } else {
                 time_granularity = args[2];
@@ -60,8 +61,7 @@ module.exports = {
             const channel_id = receivedCommand.channel.id;
             const creation_date = receivedCommand.createdAt;
             const expiration_date = _compute_expiration_date(creation_date, time_value, time_granularity);
-            const content = reminder_content;
-            const reminder = Reminder(0, user_id, user_name, channel_id, creation_date, expiration_date, content);
+            const reminder = Reminder(0, user_id, user_name, channel_id, creation_date, expiration_date, reminder_content);
 
             _new_reminder(client, pool, reminder);
 
@@ -74,6 +74,7 @@ module.exports = {
 
 //r - See struct Reminder.
 async function _new_reminder(client, pool, r) {
+    console.log('Creating a new reminder...');
     const clientDB = await pool.connect(); {
         const query_text = 'INSERT INTO reminders(user_id, user_name, channel_id, creation_date, expiration_date, content) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *';
         const query_values = [r.user_id, r.user_name, r.channel_id, r.creation_date.toGMTString(), r.expiration_date.toGMTString(), r.content];
@@ -85,11 +86,13 @@ async function _new_reminder(client, pool, r) {
 
 //r - See struct Reminder.
 async function _set_existing_reminder(client, pool, r) {
+    console.log('Setting a reminder from an existing database reminder...');
     _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - (new Date).getTime());
 }
 
 //r - See struct Reminder.
 async function _set_reminder_timeout(client, pool, r, timeout) {
+    console.log('Setting reminder (', r.id, ') to expire in (', r.expiration_date, ') with text (', r.content, ').');
     setTimeout((async () => {
         client.channels.get(r.channel_id).send("Hey ".concat(r.user_name + ", don't forget to " + r.content));
         const clientDB = await pool.connect(); {

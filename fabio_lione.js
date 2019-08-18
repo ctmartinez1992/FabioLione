@@ -42,12 +42,16 @@ client.on('ready', async () => {
             result.rows.forEach(function(row) {
                 if (row.name === "general_discussion") {
                     lastGeneralID = row.post_id;
+                    console.log('Setting last General Discussion post (', row.post_id, ')');
                 } else if (row.name === "weekly_releases") {
                     lastThisWeekID = row.post_id;
+                    console.log('Setting last Weekly Releases post (', row.post_id, ')');
                 } else if (row.name === "been_listening") {
                     lastListeningID = row.post_id;
+                    console.log('Setting last Been Listening post (', row.post_id, ')');
                 } else if (row.name === "weekly_recommendations") {
                     lastRecommendationsID = row.post_id;
+                    console.log('Setting last Recommendations post (', row.post_id, ')');
                 }
             });
 
@@ -139,10 +143,22 @@ function ProcessWeeklyReleases() {
                 lastListeningID = _ProcessWeeklyRelease(lastListeningID, redditPost.id, trimmedTitle, "this week i've been listening to...", redditPost.url);
                 lastRecommendationsID = _ProcessWeeklyRelease(lastRecommendationsID, redditPost.id, trimmedTitle, "recommendations for the week", redditPost.url);
 
-                if (_generalID !== lastGeneralID)                       _UpdateLastPost(lastGeneralID, "general_discussion");
-                if (_thisWeekID !== lastThisWeekID)                     _UpdateLastPost(lastThisWeekID, "weekly_releases");
-                if (_listeningID !== lastListeningID)                   _UpdateLastPost(lastListeningID, "been_listening");
-                if (_recommendationsID !== lastRecommendationsID)       _UpdateLastPost(lastRecommendationsID, "weekly_recommendations");
+                if (_generalID !== lastGeneralID) {
+                    console.log("Updating General Discussion database entry from old id (", _generalID, " to new id (", lastGeneralID, ").");
+                    _UpdateLastPost(lastGeneralID, "general_discussion");
+                }                      
+                if (_thisWeekID !== lastThisWeekID) {
+                    console.log("Updating Weekly Releases database entry from old id (", _thisWeekID, " to new id (", lastThisWeekID, ").");
+                    _UpdateLastPost(lastThisWeekID, "weekly_releases");
+                }
+                if (_listeningID !== lastListeningID) {
+                    console.log("Updating Been Listening database entry from old id (", _listeningID, " to new id (", lastListeningID, ").");
+                    _UpdateLastPost(lastListeningID, "been_listening");
+                }
+                if (_recommendationsID !== lastRecommendationsID) {
+                    console.log("Updating Recommendations database entry from old id (", _recommendationsID, " to new id (", lastRecommendationsID, ").");
+                    _UpdateLastPost(lastRecommendationsID, "weekly_recommendations");
+                }
             }
         }
     });
