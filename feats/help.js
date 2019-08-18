@@ -10,7 +10,6 @@ List of available commands:
     \\set: Change internal variables to customize behavior.
     \\corgi or \\corgo: Fresh corgi content.
     \\shibe or \\shiba: Fresh shibe content.
-    \\sabaton: For some sick dududu beats.
     \\remind: To help you remind of whatever you want.
     \\wrong: When you're right.
     \\pathetic: When you're right and disappointed.`);
@@ -25,8 +24,6 @@ List of available commands:
                 receivedCommand.channel.send(`Searches reddit for a good ol' corgo.`);
             } else if (args[0] === 'shibe' || args[0] === 'shiba') {
                 receivedCommand.channel.send(`Searches reddit for a good ol' shiba.`);
-            } else if (args[0] === 'sabaton') {
-                receivedCommand.channel.send(`Then the winged hussars arrived!`);
             } else if (args[0] === 'remind') {
                 receivedCommand.channel.send(`\n
 Fabio will guestfully remind you of whatever you need, no matter how dirty ( ͡° ͜ʖ ͡°). Use:
