@@ -314,7 +314,7 @@ function SabatonCommand(args, receivedCommand) {
 function DemonBitchCommand(command, args, receivedCommand) {
     if (command === "demon" && args.length >= 1 && args[0] === "bitch") {
         receivedCommand.channel.send('aoty');
-    } else {
+    } else if (command === "demon_bitch" || command === "demonbitch") {
         receivedCommand.channel.send('aoty');
     }
 }
