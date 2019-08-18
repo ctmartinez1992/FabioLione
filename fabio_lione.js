@@ -215,6 +215,8 @@ async function processCommand(receivedCommand) {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=ybGOT4d2Hs8');
     } else if (command === "aoty") {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=n03AEI2NiKM');
+    } else if (command === "demon" || command === "demon_bitch" || command === "demonbitch") {
+        DemonBitchCommand(command, args, receivedCommand);
     }
 }
 
@@ -307,6 +309,14 @@ function SabatonCommand(args, receivedCommand) {
     }
 
     client.channels.get(channelID).send(string);
+}
+
+function DemonBitchCommand(command, args, receivedCommand) {
+    if (command === "demon" && args.length >= 1 && args[0] === "bitch") {
+        receivedCommand.channel.send('aoty');
+    } else {
+        receivedCommand.channel.send('aoty');
+    }
 }
 
 //⚒⚒⚒Madwave is forever⚒⚒⚒\\
