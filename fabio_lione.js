@@ -200,17 +200,17 @@ async function processCommand(receivedCommand) {
     } else if (command === "set") {
         SetCommand(args, receivedCommand);
     } else if (command === "corgi" || command === "corgo") {
-        images.CorgiCommand(client, args, receivedCommand);
+        images.CorgiCommand(client, receivedCommand, config.corgi_list);
     } else if (command === "shibe" || command === "shiba") {
-        images.ShibeCommand(client, args, receivedCommand);
+        images.ShibeCommand(client, receivedCommand, config.shibe_list);
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
     } else if (command === "remind") {
         await reminders.RemindCommand(args, receivedCommand, client, pool);
     } else if (command === "wrong") {
-        images.WrongCommand(client, args, receivedCommand);
+        images.WrongCommand(client, receivedCommand, config.wrong_list);
     } else if (command === "pathetic") {
-        images.PatheticCommand(client, args, receivedCommand);
+        images.PatheticCommand(client, receivedCommand, config.pathetic_list);
     } else if (command === "longest" || command === "longestsong" || command === "longest_song") {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=ybGOT4d2Hs8');
     } else if (command === "aoty") {

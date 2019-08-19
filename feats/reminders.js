@@ -92,7 +92,7 @@ async function _set_existing_reminder(client, pool, r) {
 
 //r - See struct Reminder.
 async function _set_reminder_timeout(client, pool, r, timeout) {
-    console.log('Setting reminder (', r.id, ') to expire in (', r.expiration_date, ') with text (', r.content, ').');
+    console.log('Setting reminder ('.concat(r.id, ') to expire in (', r.expiration_date, ') with text (', r.content, ').'));
     setTimeout((async () => {
         client.channels.get(r.channel_id).send("Hey ".concat(r.user_name + ", don't forget to " + r.content));
         const clientDB = await pool.connect(); {

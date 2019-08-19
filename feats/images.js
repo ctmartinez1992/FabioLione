@@ -1,29 +1,36 @@
 const utils = require('./../utils');
-const config = require('./../config');
 
 const request = require('request');
 
+lastCorgiImage = "";
+lastShibeImage = "";
+lastWrongImage = "";
+lastPatheticImage = "";
+
 module.exports = {
-    CorgiCommand: function(client, args, receivedCommand) {
-        _send_image_from_subreddit_list(client, receivedCommand, config.corgi_list);
+    CorgiCommand: function(client, receivedCommand, list) {
+        _send_image_from_subreddit_list(client, receivedCommand, list, lastCorgiImage);
     },
-    ShibeCommand: function(client, args, receivedCommand) {
-        _send_image_from_subreddit_list(client, receivedCommand, config.shibe_list);
+    ShibeCommand: function(client, receivedCommand, list) {
+        _send_image_from_subreddit_list(client, receivedCommand, list, lastShibeImage);
     },
-    WrongCommand: function(client, args, receivedCommand) {
-        _send_image_from_link_list(client, receivedCommand, config.wrong_list);
+    WrongCommand: function(client, receivedCommand, list) {
+        _send_image_from_link_list(client, receivedCommand, list, lastWrongImage);
     },
-    PatheticCommand: function(client, args, receivedCommand) {
-        _send_image_from_link_list(client, receivedCommand, config.pathetic_list);
+    PatheticCommand: function(client, receivedCommand, list) {
+        _send_image_from_link_list(client, receivedCommand, list, lastPatheticImage);
     }
 }
 
 //TODO (carlos): This should only get images and videos.
-function _send_image_from_subreddit_list(client, receivedCommand, list) {
+function _send_image_from_subreddit_list(client, receivedCommand, list, lastImage) {
     const channelID = receivedCommand.channel.id; 
 
-    const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
-    const url = list[randomListID];
+    var url = lastImage;
+    while(url === lastImage) {
+        const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
+        url = list[randomListID];
+    }
 
     console.log("Getting a fresh image from ".concat(url));
     return request.get({
@@ -49,11 +56,14 @@ function _send_image_from_subreddit_list(client, receivedCommand, list) {
     });
 }
 
-function _send_image_from_link_list(client, receivedCommand, list) {
+function _send_image_from_link_list(client, receivedCommand, list, lastImage) {
     const channelID = receivedCommand.channel.id; 
 
-    const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
-    const url = list[randomListID];
+    var url = lastImage;
+    while(url === lastImage) {
+        const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
+        url = list[randomListID];
+    }
 
     console.log('Sending this URL ('.concat(url, ') to channel.'));
     client.channels.get(channelID).send(url);
