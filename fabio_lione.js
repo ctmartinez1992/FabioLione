@@ -217,6 +217,8 @@ async function processCommand(receivedCommand) {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=n03AEI2NiKM');
     } else if (command === "demon" || command === "demon_bitch" || command === "demonbitch") {
         DemonBitchCommand(command, args, receivedCommand);
+    } else if (command === "brutal") {
+        images.BrutalCommand(client, receivedCommand, config.brutal_list);
     }
 }
 

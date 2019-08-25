@@ -10,6 +10,7 @@ let heroku_config = new aws.S3({
     shibe_list:                             process.env.SHIBE_LIST,
     wrong_list:                             process.env.WRONG_LIST,
     pathetic_list:                          process.env.PATHETIC_LIST,
+    brutal_list:                            process.env.BRUTAL_LIST,
     database_url:                           process.env.DATABASE_URL,
 });
 
@@ -28,5 +29,6 @@ module.exports = {
     shibe_list:						        JSON.parse(heroku_config.config.shibe_list),
     wrong_list:                             JSON.parse(heroku_config.config.wrong_list),
     pathetic_list:                          JSON.parse(heroku_config.config.pathetic_list),
+    brutal_list:                            JSON.parse(heroku_config.config.brutal_list),
     database_url:                           heroku_config.config.database_url,
 };

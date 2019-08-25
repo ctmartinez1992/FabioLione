@@ -6,19 +6,23 @@ lastCorgiImage = "";
 lastShibeImage = "";
 lastWrongImage = "";
 lastPatheticImage = "";
+lastBrutalImage = "";
 
 module.exports = {
     CorgiCommand: function(client, receivedCommand, list) {
-        _send_image_from_subreddit_list(client, receivedCommand, list, lastCorgiImage);
+        lastCorgiImage = _send_image_from_subreddit_list(client, receivedCommand, list, lastCorgiImage);
     },
     ShibeCommand: function(client, receivedCommand, list) {
-        _send_image_from_subreddit_list(client, receivedCommand, list, lastShibeImage);
+        lastShibeImage = _send_image_from_subreddit_list(client, receivedCommand, list, lastShibeImage);
     },
     WrongCommand: function(client, receivedCommand, list) {
-        _send_image_from_link_list(client, receivedCommand, list, lastWrongImage);
+        lastWrongImage = _send_image_from_link_list(client, receivedCommand, list, lastWrongImage);
     },
     PatheticCommand: function(client, receivedCommand, list) {
-        _send_image_from_link_list(client, receivedCommand, list, lastPatheticImage);
+        lastPatheticImage = _send_image_from_link_list(client, receivedCommand, list, lastPatheticImage);
+    },
+    BrutalCommand: function(client, receivedCommand, list) {
+        lastBrutalImage = _send_image_from_link_list(client, receivedCommand, list, lastBrutalImage);
     }
 }
 
@@ -67,4 +71,6 @@ function _send_image_from_link_list(client, receivedCommand, list, lastImage) {
 
     console.log('Sending this URL ('.concat(url, ') to channel.'));
     client.channels.get(channelID).send(url);
+
+    return url
 }
