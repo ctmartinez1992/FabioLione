@@ -5,6 +5,7 @@ const config = require('./config');
 
 const help = require('./feats/help');
 const images = require('./feats/images');
+const manowar = require('./feats/manowar');
 const reminders = require('./feats/reminders');
 
 const request = require('request');
@@ -219,6 +220,8 @@ async function processCommand(receivedCommand) {
         DemonBitchCommand(command, args, receivedCommand);
     } else if (command === "brutal") {
         images.BrutalCommand(client, receivedCommand, config.brutal_list);
+    } else if (command === "manowar") {
+        manowar.ManowarCommand(receivedCommand);
     }
 }
 
