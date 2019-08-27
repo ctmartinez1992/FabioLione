@@ -2,12 +2,17 @@ const utils = require('./../utils');
 
 module.exports = {
     ManowarCommand: function(receivedCommand) {
-        const song = _build_song(receivedCommand);
+        const song = _build_manowar_song(receivedCommand);
+        receivedCommand.channel.send(song);
+    },
+
+    PMSongCommand: function(receivedCommand) {
+        const song = _build_pm_song(receivedCommand);
         receivedCommand.channel.send(song);
     }
 }
 
-var terms = {
+var _manowar_terms = {
     nouns: [
         "Battle", "Blood", "Death", "Enemies", "Fire", "Glory", "Hammer", "Honor", "Horse", "Kings",
         "Master", "Metal", "Power", "Steel", "Sword", "Warrior", "Wind"
@@ -30,7 +35,31 @@ var terms = {
     ]
 };
 
-function _build_verse(short) {
+var _pm_terms = {
+    nouns: [
+        "Battle", "Blood", "Death", "Thunder", "Fire", "Glory", "Dream", "Dragons", "Magic", "Kings",
+        "Might", "Metal", "Power", "Steel", "Sword", "Warrior", "Wind", "Axe", "Hammer", "Land",
+        "Mountains", "Eyes"
+    ],
+    verbs: [
+        "Attack", "Behold", "Burn", "Feel", "Fight", "Hail", "Kill", "Ride", "Fly", "Slay", 
+    ],
+    adjectives: [
+        "Bloody", "Brave", "Powerful", "Fierce", "Heavy", "Loud", "Magic", "Mighty", "Proud", "Screaming",
+        "Strong", "Victorious", "Emerald", "Crimson", "Sapphire", "Evil"
+    ],
+    subjects: [
+        "I", "we", "they"
+    ],
+    adverbs: [
+        "the", "for the", "for", "of", ""
+    ],
+    connectors: [
+        "and", "and the", "with", "without", "against the", "to the"
+    ]
+};
+
+function _build_verse(terms, short) {
     var verse = [];
     if (utils.GetRandomIntInRange(0, 2) === 0) {
         verse.push(utils.ShuffleArray(terms.subjects)[0]);
@@ -66,22 +95,22 @@ function _build_verse(short) {
     return verse;
 };
   
-const _build_song = (receivedCommand) => {
-    const title = _build_verse(true);
+const _build_manowar_song = (receivedCommand) => {
+    const title = _build_verse(_manowar_terms, true);
     const lyrics = [];
     for (let i = 0; i < 4; i++) {
-        lyrics.push(_build_verse());
+        lyrics.push(_build_verse(_manowar_terms, false));
     }
 
     /*
     lyrics.push("");
     lyrics.push(title);
-    lyrics.push(_build_verse());
+    lyrics.push(_build_verse(_manowar_terms, false));
     lyrics.push(title);
-    lyrics.push(_build_verse());
+    lyrics.push(_build_verse(_manowar_terms, false));
     lyrics.push("");
     for (let i = 0; i < 4; i++) {
-        lyrics.push(_build_verse());
+        lyrics.push(_build_verse(_manowar_terms, false));
     }
   
     lyrics.push("");
@@ -94,6 +123,10 @@ const _build_song = (receivedCommand) => {
         title: title,
         lyrics: lyrics.join("\n")
     });
+};
+  
+const _build_pm_song = (receivedCommand, terms) => {
+    return _build_verse(_pm_terms, true).join(" ");
 };
 
 const _prettify_song = (song) => {

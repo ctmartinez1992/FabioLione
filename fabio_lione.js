@@ -222,6 +222,8 @@ async function processCommand(receivedCommand) {
         images.BrutalCommand(client, receivedCommand, config.brutal_list);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
+    } else if (command === "pmsong") {
+        manowar.PMSongCommand(receivedCommand);
     }
 }
 
