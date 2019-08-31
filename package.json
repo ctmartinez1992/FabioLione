@@ -6,6 +6,7 @@
   "dependencies": {
     "aws-sdk": "^2.503.0",
     "bluebird": "^3.5.5",
+    "convert-units": "^2.3.4",
     "discord.js": "^11.5.1",
     "pg": "^7.12.1",
     "request": "^2.88.0"
