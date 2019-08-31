@@ -1,8 +1,9 @@
 'use strict';
 
 const utils = require('./utils');
-const config = require('./config');
+const config = require('./my_config');
 
+const cnv = require('./feats/cnv');
 const help = require('./feats/help');
 const images = require('./feats/images');
 const manowar = require('./feats/manowar');
@@ -224,6 +225,8 @@ async function processCommand(receivedCommand) {
         manowar.ManowarCommand(receivedCommand);
     } else if (command === "pmsong") {
         manowar.PMSongCommand(receivedCommand);
+    } else if (command === "cnv") {
+        cnv.CnvCurrencyCommand(args, receivedCommand);
     }
 }
 
