@@ -1,7 +1,7 @@
 'use strict';
 
 const utils = require('./utils');
-const config = require('./my_config');
+const config = require('./config');
 
 const cnv = require('./feats/cnv');
 const help = require('./feats/help');
