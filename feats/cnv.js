@@ -79,7 +79,7 @@ module.exports = {
                 receivedCommand.channel.send(args[0].concat(" is an invalid argument."));
             }
         }
-        if (args.length === 3) {
+        else if (args.length === 3) {
             const value = Number(args[0]);
             const from = args[1];
             const to = args[2];
