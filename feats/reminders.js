@@ -38,14 +38,14 @@ module.exports = {
             var reminder_content = "";
 
             if (!_validate_time_value(args[1])) {
-                receivedCommand.channel.send(`Invalid time value (`, args[1] ,`). Must be a positive integer above 0`);
+                receivedCommand.channel.send(`Invalid time value (`.concat(args[1]`). Must be a positive integer above 0`));
                 return;
             } else {
                 time_value = parseInt(args[1]);
             }
 
             if (!_validate_time_granularity(args[2])) {
-                receivedCommand.channel.send(`Invalid time granularity (`, args[1] ,`). Must be minute(s), hour(s), day(s), month(s) or year(s).`);
+                receivedCommand.channel.send(`Invalid time granularity (`.concat(args[1] ,`). Must be minute(s), hour(s), day(s), month(s) or year(s).`));
                 return;
             } else {
                 time_granularity = args[2];
@@ -80,26 +80,37 @@ async function _new_reminder(client, pool, r) {
         const query_values = [r.user_id, r.user_name, r.channel_id, r.creation_date.toGMTString(), r.expiration_date.toGMTString(), r.content];
         const result = await clientDB.query(query_text, query_values);
         r.id = result.rows[0].id;
-        _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - r.creation_date.getTime());
+        _set_reminder_timeout(client, pool, r, r.expiration_date);
     } clientDB.release();
 }
 
 //r - See struct Reminder.
 async function _set_existing_reminder(client, pool, r) {
     console.log('Setting a reminder from an existing database reminder...');
-    _set_reminder_timeout(client, pool, r, r.expiration_date.getTime() - (new Date).getTime());
+    _set_reminder_timeout(client, pool, r, r.expiration_date);
 }
 
 //r - See struct Reminder.
-async function _set_reminder_timeout(client, pool, r, timeout) {
+async function _set_reminder_timeout(client, pool, r, date) {
     console.log('Setting reminder ('.concat(r.id, ') to expire in (', r.expiration_date, ') with text (', r.content, ').'));
-    setTimeout((async () => {
+    runAtDate((async () => {
         client.channels.get(r.channel_id).send("Hey ".concat(r.user_name + ", don't forget to " + r.content));
         const clientDB = await pool.connect(); {
             const query = `DELETE FROM reminders WHERE reminders.id = `.concat(r.id, ";");
             await clientDB.query(query);
         } clientDB.release();
-    }), timeout);
+    }), date);
+}
+
+function runAtDate(func, date) {
+    var now = (new Date()).getTime();
+    var then = date.getTime();
+    var diff = Math.max((then - now), 0);
+    if (diff > 0x7FFFFFFF) {
+        setTimeout(function() { runAtDate(date, func); }, 0x7FFFFFFF);
+    } else {
+        setTimeout(func, diff);
+    }
 }
 
 function _validate_time_value(value) {
