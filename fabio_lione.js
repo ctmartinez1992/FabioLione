@@ -59,6 +59,8 @@ client.on('ready', async () => {
 
             await reminders.Init(client, pool);
         } clientDB.release();
+
+        var x=1;
     }
 });
 
@@ -221,6 +223,8 @@ async function processCommand(receivedCommand) {
         DemonBitchCommand(command, args, receivedCommand);
     } else if (command === "brutal") {
         images.BrutalCommand(client, receivedCommand, config.brutal_list);
+    } else if (command === "riffs") {
+        images.RiffsCommand(client, receivedCommand, config.riffs_list);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
     } else if (command === "pmsong") {

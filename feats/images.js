@@ -7,6 +7,7 @@ lastShibeImage = "";
 lastWrongImage = "";
 lastPatheticImage = "";
 lastBrutalImage = "";
+lastRiffsImage = "";
 
 module.exports = {
     CorgiCommand: function(client, receivedCommand, list) {
@@ -23,6 +24,9 @@ module.exports = {
     },
     BrutalCommand: function(client, receivedCommand, list) {
         lastBrutalImage = _send_image_from_link_list(client, receivedCommand, list, lastBrutalImage);
+    },
+    RiffsCommand: function(client, receivedCommand, list) {
+        lastRiffsImage = _send_image_from_subreddit_list(client, receivedCommand, list, lastRiffsImage);
     }
 }
 

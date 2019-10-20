@@ -45,7 +45,7 @@ module.exports = {
             }
 
             if (!_validate_time_granularity(args[2])) {
-                receivedCommand.channel.send(`Invalid time granularity (`.concat(args[1] ,`). Must be minute(s), hour(s), day(s), month(s) or year(s).`));
+                receivedCommand.channel.send(`Invalid time granularity (`.concat(args[0] ,`). Must be minute(s), hour(s), day(s), month(s) or year(s).`));
                 return;
             } else {
                 time_granularity = args[2];
