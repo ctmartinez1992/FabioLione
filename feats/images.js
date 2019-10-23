@@ -27,6 +27,9 @@ module.exports = {
     },
     RiffsCommand: function(client, receivedCommand, list) {
         lastRiffsImage = _send_image_from_subreddit_list(client, receivedCommand, list, lastRiffsImage);
+    },
+    ArmpitCommand: function(client, receivedCommand) {
+        _send_image(client, receivedCommand, "https://i.imgur.com/Abzwjg7.png");
     }
 }
 
@@ -72,6 +75,15 @@ function _send_image_from_link_list(client, receivedCommand, list, lastImage) {
         const randomListID = utils.GetRandomIntInRange(0, list.length - 1);
         url = list[randomListID];
     }
+
+    console.log('Sending this URL ('.concat(url, ') to channel.'));
+    client.channels.get(channelID).send(url);
+
+    return url
+}
+
+function _send_image(client, receivedCommand, url) {
+    const channelID = receivedCommand.channel.id; 
 
     console.log('Sending this URL ('.concat(url, ') to channel.'));
     client.channels.get(channelID).send(url);

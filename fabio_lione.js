@@ -225,6 +225,8 @@ async function processCommand(receivedCommand) {
         images.BrutalCommand(client, receivedCommand, config.brutal_list);
     } else if (command === "riffs") {
         images.RiffsCommand(client, receivedCommand, config.riffs_list);
+    } else if (command === "armpit") {
+        images.ArmpitCommand(client, receivedCommand);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
     } else if (command === "pmsong") {
