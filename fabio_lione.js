@@ -219,6 +219,8 @@ async function processCommand(receivedCommand) {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=ybGOT4d2Hs8');
     } else if (command === "aoty") {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=n03AEI2NiKM');
+    } else if (command === "burrito") {
+        receivedCommand.channel.send('https://www.youtube.com/watch?v=AAQI1y0Fl6E');
     } else if (command === "demon" || command === "demon_bitch" || command === "demonbitch") {
         DemonBitchCommand(command, args, receivedCommand);
     } else if (command === "brutal") {
