@@ -4,6 +4,7 @@ const utils = require('./utils');
 const config = require('./config');
 
 const cnv = require('./feats/cnv');
+const dice = require('./feats/dice');
 const help = require('./feats/help');
 const images = require('./feats/images');
 const manowar = require('./feats/manowar');
@@ -221,6 +222,8 @@ async function processCommand(receivedCommand) {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=n03AEI2NiKM');
     } else if (command === "burrito") {
         receivedCommand.channel.send('https://www.youtube.com/watch?v=AAQI1y0Fl6E');
+    } else if (command === "afraid") {
+        receivedCommand.channel.send('https://www.youtube.com/watch?v=-rnAd0C4Z7M');
     } else if (command === "demon" || command === "demon_bitch" || command === "demonbitch") {
         DemonBitchCommand(command, args, receivedCommand);
     } else if (command === "brutal") {
@@ -235,6 +238,8 @@ async function processCommand(receivedCommand) {
         manowar.PMSongCommand(receivedCommand);
     } else if (command === "cnv") {
         cnv.CnvCurrencyCommand(args, receivedCommand);
+    } else if (command === "roll") {
+        dice.Roll(args, receivedCommand);
     }
 }
 
