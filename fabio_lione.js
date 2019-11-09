@@ -194,7 +194,7 @@ function _ProcessWeeklyRelease(lastID, redditPostID, trimmedTitle, stringToCompa
 async function processCommand(receivedCommand) {
     let fullCommand = receivedCommand.content.substr(1);
     let splitCommand = fullCommand.split(' ');
-    let command = splitCommand[0];
+    let command = splitCommand[0].toLowerCase();
     let args = splitCommand.slice(1);
 
     console.log('Processing ('.concat(command, ') with arguments (', args, ').'));
@@ -232,6 +232,8 @@ async function processCommand(receivedCommand) {
         images.RiffsCommand(client, receivedCommand, config.riffs_list);
     } else if (command === "armpit") {
         images.ArmpitCommand(client, receivedCommand);
+    } else if (command === "bingo" || command === "bingpot") {
+        images.BingoCommand(client, receivedCommand);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
     } else if (command === "pmsong") {
