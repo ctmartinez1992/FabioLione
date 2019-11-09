@@ -1,7 +1,7 @@
 'use strict';
 
 const utils = require('./utils');
-const config = require('./config');
+const config = require('./my_config');
 
 const cnv = require('./feats/cnv');
 const dice = require('./feats/dice');
@@ -245,7 +245,7 @@ async function processCommand(receivedCommand) {
     } else if (command === "cnv") {
         cnv.CnvCurrencyCommand(args, receivedCommand);
     } else if (command === "roll") {
-        dice.Roll(args, receivedCommand);
+        dice.RollCommand(args, receivedCommand);
     }
 }
 
