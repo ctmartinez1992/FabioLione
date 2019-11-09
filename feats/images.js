@@ -33,6 +33,9 @@ module.exports = {
     },
     BingoCommand: function(client, receivedCommand) {
         _send_image(client, receivedCommand, "https://cdn.discordapp.com/attachments/230359936566165506/623600237604241411/bingoliva_final.png");
+    },
+    OlivaCommand: function(client, receivedCommand) {
+        _send_image(client, receivedCommand, "https://cdn.discordapp.com/attachments/230359936566165506/642448559446163481/unknown.png");
     }
 }
 

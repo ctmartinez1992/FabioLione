@@ -234,6 +234,8 @@ async function processCommand(receivedCommand) {
         images.ArmpitCommand(client, receivedCommand);
     } else if (command === "bingo" || command === "bingpot") {
         images.BingoCommand(client, receivedCommand);
+    } else if (command === "oliva" || command === "sexyoliva" || command === "sexy_oliva") {
+        images.OlivaCommand(client, receivedCommand);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
     } else if (command === "pmsong") {
