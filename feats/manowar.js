@@ -5,7 +5,10 @@ module.exports = {
         const song = _build_manowar_song(receivedCommand);
         receivedCommand.channel.send(song);
     },
-
+    ManowarCompleteCommand: function(receivedCommand) {
+        const song = _build_manowar_song_complete(receivedCommand);
+        receivedCommand.channel.send(song);
+    },
     PMSongCommand: function(receivedCommand) {
         const song = _build_pm_song(receivedCommand);
         receivedCommand.channel.send(song);
@@ -102,7 +105,18 @@ const _build_manowar_song = (receivedCommand) => {
         lyrics.push(_build_verse(_manowar_terms, false));
     }
 
-    /*
+    return _prettify_song({
+        title: title,
+        lyrics: lyrics.join("\n")
+    });
+};
+  
+const _build_manowar_song_complete = (receivedCommand) => {
+    const title = _build_verse(_manowar_terms, true);
+    const lyrics = [];
+    for (let i = 0; i < 4; i++) {
+        lyrics.push(_build_verse(_manowar_terms, false));
+    }
     lyrics.push("");
     lyrics.push(title);
     lyrics.push(_build_verse(_manowar_terms, false));
@@ -112,12 +126,10 @@ const _build_manowar_song = (receivedCommand) => {
     for (let i = 0; i < 4; i++) {
         lyrics.push(_build_verse(_manowar_terms, false));
     }
-  
     lyrics.push("");
     for (let i = 0; i < 4; i++) {
         lyrics.push(title);
     }
-    */
 
     return _prettify_song({
         title: title,

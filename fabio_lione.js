@@ -238,6 +238,8 @@ async function processCommand(receivedCommand) {
         images.OlivaCommand(client, receivedCommand);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
+    } else if (command === "manowar2") {
+        manowar.ManowarCompleteCommand(receivedCommand);
     } else if (command === "pmsong") {
         manowar.PMSongCommand(receivedCommand);
     } else if (command === "cnv") {
