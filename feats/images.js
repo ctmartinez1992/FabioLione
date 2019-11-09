@@ -36,6 +36,9 @@ module.exports = {
     },
     OlivaCommand: function(client, receivedCommand) {
         _send_image(client, receivedCommand, "https://cdn.discordapp.com/attachments/230359936566165506/642448559446163481/unknown.png");
+    },
+    KotipeltoCommand: function(client, receivedCommand) {
+        _send_image(client, receivedCommand, "https://cdn.discordapp.com/attachments/230359936566165506/642822191276228672/sexy_kotipelto.png");
     }
 }
 

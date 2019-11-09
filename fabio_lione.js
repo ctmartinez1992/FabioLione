@@ -1,7 +1,7 @@
 'use strict';
 
 const utils = require('./utils');
-const config = require('./my_config');
+const config = require('./config');
 
 const cnv = require('./feats/cnv');
 const dice = require('./feats/dice');
@@ -236,6 +236,8 @@ async function processCommand(receivedCommand) {
         images.BingoCommand(client, receivedCommand);
     } else if (command === "oliva" || command === "sexyoliva" || command === "sexy_oliva") {
         images.OlivaCommand(client, receivedCommand);
+    } else if (command === "timo" || command === "kotipelto" || command === "sexytimo" || command === "sexykotipelto" || command === "sexytimokotipelto") {
+        images.KotipeltoCommand(client, receivedCommand);
     } else if (command === "manowar") {
         manowar.ManowarCommand(receivedCommand);
     } else if (command === "manowar2") {
