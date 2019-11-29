@@ -28,16 +28,9 @@ module.exports = {
 * Volume (mm3, cm3, ml, l, kl, m3, km3, tsp, Tbs, in3, fl-oz, cup, pnt, qt, gal, ft3, yd3)
 * Temperature (C, F, K, R)
 * Time (ns, mu, ms, s, min, h, d, week, month, year)
-* Frequency (Hz, mHz, kHz, MHz, GHz, THz, rpm, deg/s, rad/s)
 * Speed (m/s, km/h, m/h, knot, ft/s)
 * Pace (s/m, min/km, s/ft, min/km)
-* Pressure (Pa, hPa, kPa, MPa, bar, torr, psi, ksi)
-* Digital (b, Kb, Mb, Gb, Tb, B, KB, MB, GB, TB)
 * Illuminance (lx, ft-cd)
-* Voltage (V, mV, kV)
-* Current (A, mA, kA)
-* Power (W, mW, kW, MW, GW)
-* Energy (Wh, mWh, kWh, MWh, GWh, J, kJ)
 * Angle (deg, rad, grad, arcmin, arcsec)`);
             } else if (args[0] === "list" && (args[1] === "currency" || args[1] === "money")) {
                 receivedCommand.channel.send(`\nHere are all currency units: (CAD, HKD, ISK, PHP, DKK, HUF, CZK, AUD, RON, SEK, IDR, INR, BRL, RUB, HRK, JPY, THB, CHF, SGD, PLN, BGN, TRY, CNY, NOK, NZD, ZAR, USD, MXN, ILS, GBP, KRW, MYR, EUR)`);
@@ -53,26 +46,12 @@ module.exports = {
                 receivedCommand.channel.send(`\nHere are all temperature units: (C, F, K, R)`);
             } else if (args[0] === "list" && args[1] === "time") {
                 receivedCommand.channel.send(`\nHere are all time units: (ns, mu, ms, s, min, h, d, week, month, year)`);
-            } else if (args[0] === "list" && args[1] === "frequency") {
-                receivedCommand.channel.send(`\nHere are all frequency units: (Hz, mHz, kHz, MHz, GHz, THz, rpm, deg/s, rad/s)`);
             } else if (args[0] === "list" && args[1] === "speed") {
                 receivedCommand.channel.send(`\nHere are all speed units: (m/s, km/h, m/h, knot, ft/s)`);
             } else if (args[0] === "list" && args[1] === "pace") {
                 receivedCommand.channel.send(`\nHere are all pace units: (s/m, min/km, s/ft, min/km)`);
-            } else if (args[0] === "list" && args[1] === "pressure") {
-                receivedCommand.channel.send(`\nHere are all pressure units: (Pa, hPa, kPa, MPa, bar, torr, psi, ksi)`);
-            } else if (args[0] === "list" && args[1] === "digital") {
-                receivedCommand.channel.send(`\nHere are all digital units: (b, Kb, Mb, Gb, Tb, B, KB, MB, GB, TB)`);
             } else if (args[0] === "list" && args[1] === "illuminance") {
                 receivedCommand.channel.send(`\nHere are all illuminance units: (lx, ft-cd)`);
-            } else if (args[0] === "list" && args[1] === "voltage") {
-                receivedCommand.channel.send(`\nHere are all voltage units: (V, mV, kV)`);
-            } else if (args[0] === "list" && args[1] === "current") {
-                receivedCommand.channel.send(`\nHere are all current units: (A, mA, kA)`);
-            } else if (args[0] === "list" && args[1] === "power") {
-                receivedCommand.channel.send(`\nHere are all power units: (W, mW, kW, MW, GW)`);
-            } else if (args[0] === "list" && args[1] === "energy") {
-                receivedCommand.channel.send(`\nHere are all energy units: (Wh, mWh, kWh, MWh, GWh, J, kJ)`);
             } else if (args[0] === "list" && args[1] === "angle") {
                 receivedCommand.channel.send(`\nHere are all angle units: (deg, rad, grad, arcmin, arcsec)`);
             } else {
@@ -88,8 +67,8 @@ module.exports = {
                 _cnv_currency(receivedCommand, value, from.toUpperCase(), to.toUpperCase());
             } else {
                 try {
-                    const convertedValue = convert(value).from(from).to(to);
-                    const response = value.toString(10).concat(' ', from, ' is ', convertedValue, ' ', to);
+                    const convertedValue = convert(value).from(from.toUpperCase()).to(to.toUpperCase());
+                    const response = value.toString(10).concat(' ', from.toUpperCase(), ' is ', convertedValue, ' ', to.toUpperCase());
                     receivedCommand.channel.send(response);
                 } catch(err) {
                     receivedCommand.channel.send("Something went wrong, check your units");
