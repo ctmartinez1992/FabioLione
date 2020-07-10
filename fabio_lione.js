@@ -229,7 +229,7 @@ async function processCommand(receivedCommand) {
     } else if (command === "brutal") {
         images.BrutalCommand(client, receivedCommand, config.brutal_list);
     } else if (command === "riffs") {
-        images.RiffsCommand(client, receivedCommand, config.riffs_list);
+        receivedCommand.channel.send('*No riffs allowed!*');
     } else if (command === "armpit") {
         images.ArmpitCommand(client, receivedCommand);
     } else if (command === "bingo" || command === "bingpot") {
@@ -249,8 +249,8 @@ async function processCommand(receivedCommand) {
     } else if (command === "roll") {
         dice.RollCommand(args, receivedCommand);
     } else if (command === "fabio") {
-        receivedCommand.channel.send("I'm aliiiiiiiiiiiive");
-    }
+        receivedCommand.channel.send("I'M ALIIIIIIIIIIIIIIVE");
+    } 
 }
 
 function ToggleCommand(args, receivedCommand) {
