@@ -248,6 +248,8 @@ async function processCommand(receivedCommand) {
         cnv.CnvCurrencyCommand(args, receivedCommand);
     } else if (command === "roll") {
         dice.RollCommand(args, receivedCommand);
+    } else if (command === "fabio") {
+        receivedCommand.channel.send("I'm aliiiiiiiiiiiive");
     }
 }
 
