@@ -228,7 +228,7 @@ async function processCommand(receivedCommand) {
         DemonBitchCommand(command, args, receivedCommand);
     } else if (command === "brutal") {
         images.BrutalCommand(client, receivedCommand, config.brutal_list);
-    }else if (command === "riffs") {
+    } else if (command === "riffs") {
         receivedCommand.channel.send('*No riffs allowed!*');
     } else if (command === "armpit") {
         images.ArmpitCommand(client, receivedCommand);
