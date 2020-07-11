@@ -13,7 +13,7 @@ module.exports = {
             }
             arg = arg.trim();
 
-            var url = "https://www.lyrics.rip/generate?q=".concat(arg);
+            var url = "https://www.lyrics.rip/generate?n=100&q=".concat(arg);
 
             request.get({
                 url,
