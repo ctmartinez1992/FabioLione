@@ -7,6 +7,7 @@ const cnv = require('./feats/cnv');
 const dice = require('./feats/dice');
 const help = require('./feats/help');
 const images = require('./feats/images');
+const lyrics = require('./feats/lyrics');
 const manowar = require('./feats/manowar');
 const reminders = require('./feats/reminders');
 
@@ -250,6 +251,8 @@ async function processCommand(receivedCommand) {
         dice.RollCommand(args, receivedCommand);
     } else if (command === "fabio") {
         receivedCommand.channel.send("I'M ALIIIIIIIIIIIIIIVE");
+    } else if (command === "lyrics") {
+        lyrics.LyricsCommand(args, receivedCommand);
     } 
 }
 
