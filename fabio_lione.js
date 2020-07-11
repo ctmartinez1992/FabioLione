@@ -249,8 +249,6 @@ async function processCommand(receivedCommand) {
         cnv.CnvCurrencyCommand(args, receivedCommand);
     } else if (command === "roll") {
         dice.RollCommand(args, receivedCommand);
-    } else if (command === "fabio") {
-        receivedCommand.channel.send("I'M ALIIIIIIIIIIIIIIVE");
     } else if (command === "lyrics") {
         lyrics.LyricsCommand(args, receivedCommand);
     } 

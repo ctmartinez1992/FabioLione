@@ -5,12 +5,18 @@ const utils = require('./../utils');
 module.exports = {
     LyricsCommand: function(args, receivedCommand) {
         if (args.length === 0) {
-            receivedCommand.channel.send(`Fabio needs a name fool! Lyrics of what?`);
+            receivedCommand.channel.send(`Fabio needs a name fool! Lyrics of whom?`);
         } else if (args.length >= 1) {
-            var arg = args[0];
+            var arg = " ";
+            for (var i=0; i<args.length; i++) {
+                arg = arg.concat(args[i], " ");
+            }
+            arg = arg.trim();
+
+            var url = "https://www.lyrics.rip/generate?q=".concat(arg);
 
             request.get({
-                url: "https://www.lyrics.rip/s/Rihanna",
+                url,
                 json: true,
                 headers: { 'User-Agent': 'request' }
             }, (err, res, data) => {
@@ -19,9 +25,8 @@ module.exports = {
                 } else if (res.statusCode !== 200) {
                     console.log('Status: '.concat(res.statusCode, ' -- Quitting function.'));
                 } else {
-                    console.log('URL ('.concat("https://www.lyrics.rip/s/Rihanna", ') retrieved data successfully.'));
-                    console.log(data);
-                    receivedCommand.channel.send("did something");
+                    console.log('URL ('.concat(url, ') retrieved data successfully.'));
+                    receivedCommand.channel.send(data);
                 }
             });
         }
