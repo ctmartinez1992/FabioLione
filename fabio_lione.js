@@ -8,6 +8,7 @@ const help = require('./feats/help');
 const images = require('./feats/images');
 const lyrics = require('./feats/lyrics');
 const manowar = require('./feats/manowar');
+const welcome = require('./feats/welcome');
 const reminders = require('./feats/reminders');
 
 const request = require('request');
@@ -251,6 +252,8 @@ async function processCommand(receivedCommand) {
         dice.RollCommand(args, receivedCommand);
     } else if (command === "lyrics") {
         lyrics.LyricsCommand(args, receivedCommand);
+    } else if (command === "welcome") {
+        welcome.WelcomeCommand(client, args, receivedCommand);
     } 
 }
 
