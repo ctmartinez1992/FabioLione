@@ -3,11 +3,12 @@
 const utils = require('./utils');
 const config = require('./config');
 
-const cnv = require('./feats/cnv');
 const dice = require('./feats/dice');
 const help = require('./feats/help');
 const images = require('./feats/images');
+const lyrics = require('./feats/lyrics');
 const manowar = require('./feats/manowar');
+const welcome = require('./feats/welcome');
 const reminders = require('./feats/reminders');
 
 const request = require('request');
@@ -15,20 +16,22 @@ const request = require('request');
 const Discord = require('discord.js');
 const client = new Discord.Client();
 
-const { Pool } = require('pg');
-const pool = new Pool({
-    connectionString: config.database_url,
-    ssl: true
-});
+// These variables aren't currently being used.
+    const { Pool } = require('pg');
+    const pool = new Pool({
+        connectionString: config.database_url,
+        ssl: true
+    });
 
-//NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
-var weeklyReleasesIsActive = false;
-var weeklyReleasesInterval = config.weekly_releases_interval_default;
-var weeklyReleasesFuncObj = null;
-var lastGeneralID = 0;              //General Discussions thread.
-var lastThisWeekID = 0;             //This Week in Power Metal Releases thread.
-var lastListeningID = 0;            //This Week I've been Listening thread.
-var lastRecommendationsID = 0;      //Recommendations for the Week thread.
+    //NOTE (carlos): Set to true if you want it disabled on start-up. This is because I'm using the toggle function on the ready callback.
+    var weeklyReleasesIsActive = false;
+    var weeklyReleasesInterval = config.weekly_releases_interval_default;
+    var weeklyReleasesFuncObj = null;
+    var lastGeneralID = 0;              //General Discussions thread.
+    var lastThisWeekID = 0;             //This Week in Power Metal Releases thread.
+    var lastListeningID = 0;            //This Week I've been Listening thread.
+    var lastRecommendationsID = 0;      //Recommendations for the Week thread.
+// These variables aren't currently being used.
 
 client.login(config.bot_secret);
 
@@ -38,6 +41,8 @@ client.on('ready', async () => {
     } else {
         console.log('Connected as ', client.user.tag);
 
+        // I have deactivated this feature, but kept the code for historical reasons.
+        /*
         ToggleWeeklyReleasesFeature();
 
         const clientDB = await pool.connect(); {
@@ -60,8 +65,7 @@ client.on('ready', async () => {
 
             await reminders.Init(client, pool);
         } clientDB.release();
-
-        var x=1;
+        */
     }
 });
 
@@ -200,10 +204,10 @@ async function processCommand(receivedCommand) {
     console.log('Processing ('.concat(command, ') with arguments (', args, ').'));
     if (command === "help") {
         help.HelpCommand(args, receivedCommand);
-    } else if (command === "toggle") {
-        ToggleCommand(args, receivedCommand);
-    } else if (command === "set") {
-        SetCommand(args, receivedCommand);
+    // } else if (command === "toggle") {
+    //     ToggleCommand(args, receivedCommand);
+    // } else if (command === "set") {
+    //     SetCommand(args, receivedCommand);
     } else if (command === "corgi" || command === "corgo") {
         images.CorgiCommand(client, receivedCommand, config.corgi_list);
     } else if (command === "shibe" || command === "shiba") {
@@ -211,7 +215,7 @@ async function processCommand(receivedCommand) {
     } else if (command === "sabaton") {
         SabatonCommand(args, receivedCommand);
     } else if (command === "remind") {
-        await reminders.RemindCommand(args, receivedCommand, client, pool);
+       await reminders.RemindCommand(args, receivedCommand, client, pool);
     } else if (command === "wrong") {
         images.WrongCommand(client, receivedCommand, config.wrong_list);
     } else if (command === "pathetic") {
@@ -244,12 +248,12 @@ async function processCommand(receivedCommand) {
         manowar.ManowarCompleteCommand(receivedCommand);
     } else if (command === "pmsong") {
         manowar.PMSongCommand(receivedCommand);
-    } else if (command === "cnv") {
-        cnv.CnvCurrencyCommand(args, receivedCommand);
     } else if (command === "roll") {
         dice.RollCommand(args, receivedCommand);
-    } else if (command === "fabio") {
-        receivedCommand.channel.send("I'M ALIIIIIIIIIIIIIIVE");
+    } else if (command === "lyrics") {
+        lyrics.LyricsCommand(args, receivedCommand);
+    } else if (command === "welcome") {
+        welcome.WelcomeCommand(client, args, receivedCommand);
     } 
 }
 
