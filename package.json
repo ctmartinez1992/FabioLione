@@ -10,7 +10,7 @@
     "discord.js": "^11.5.1",
     "pg": "^7.12.1",
     "request": "^2.88.0",
-    "axios": "^0.19.2"
+    "axios": "^0.21.2"
   },
   "devDependencies": {},
   "scripts": {
