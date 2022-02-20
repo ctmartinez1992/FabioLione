@@ -4,7 +4,7 @@
   "description": "Fabio Lione",
   "main": "src/fabio_lione.js",
   "dependencies": {
-    "aws-sdk": "^2.503.0",
+    "aws-sdk": "^2.814.0",
     "bluebird": "^3.5.5",
     "convert-units": "^2.3.4",
     "discord.js": "^11.5.1",
